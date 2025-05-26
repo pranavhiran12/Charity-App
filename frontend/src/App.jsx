@@ -121,6 +121,8 @@ import Register from './pages/Register';
 import Login from './pages/Login';
 import AddCharityPage from './pages/AddCharityPage';
 import SelectCharityPage from './pages/SelectCharityPage';
+import AllEventsPage from './pages/AllEventsPage';
+
 
 import EventWrapper from './components/EventWrapper';
 
@@ -137,6 +139,7 @@ function App() {
           <Route path="/create-event" element={<CreateEventPage />} />
           <Route path="/update-event/:id" element={<UpdateEventWrapper />} />
           <Route path="/event/:eventId" element={<EventWrapper><EventPage /></EventWrapper>} />
+          <Route path="/" element={<AllEventsPage />} />
 
           {/* ✅ Charity */}
           <Route path="/add-charity" element={<AddCharityPage />} />
