@@ -34,25 +34,14 @@ router.get('/:id', async(req, res) => {
     }
 });
 
-
+// Update Event
 router.put('/:id', async(req, res) => {
-    console.log("Incoming update body:", req.body);
-    console.log("Updating event ID:", req.params.id);
-
     try {
-        const updatedEvent = await Event.findByIdAndUpdate(
-            req.params.id,
-            req.body, { new: true, runValidators: true }
-        );
-
-        if (!updatedEvent) {
-            return res.status(404).json({ message: 'Event not found' });
-        }
-
-        res.status(200).json({ message: 'Event updated', data: updatedEvent });
+        const updatedEvent = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!updatedEvent) return res.status(404).json({ error: 'Event not found' });
+        res.json(updatedEvent);
     } catch (err) {
-        console.error("Update error:", err.message);
-        res.status(500).json({ message: err.message });
+        res.status(400).json({ error: err.message });
     }
 });
 

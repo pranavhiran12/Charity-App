@@ -10,18 +10,13 @@ const eventRoutes = require('./routes/eventRoutes');
 const authRoutes = require('./routes/auth'); // optional
 const charityRoutes = require('./routes/charityRoutes');
 const guestRoutes = require('./routes/guest');
-const contributionRoutes = require('./routes/contributionRoutes');
 
 // Register routes
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
-app.use('/api/charities', charityRoutes); // ✅ This is enough
-//app.use('/api/charities/:id', charityRoutes);
-
-console.log("Registering /api/guests...");
+app.use('/api/charities', charityRoutes);
+app.use('/api/charities/:id', charityRoutes);
 app.use('/api/guests', guestRoutes);
-app.use('/api/contributions', contributionRoutes);
-
-
+app.use('/api/contributions', require('./routes/contribution'));
 
 module.exports = app;

@@ -70,7 +70,7 @@ function App() {
 
 export default App;*/
 
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+/*import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import CreateEventPage from "./pages/CreateEventPage";
@@ -102,5 +102,59 @@ function App() {
   );
 }
 
-export default App;
+export default App;*/
 
+
+
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+import EventPage from './pages/EventPage';
+import CreateEventPage from './pages/CreateEventPage';
+import UpdateEventWrapper from './pages/UpdateEventWrapper';
+
+import GuestRSVPPage from './pages/GuestRSVPPage';
+import ContributePage from './pages/ContributePage';
+import ContributionListPage from './pages/ContributionListPage';
+
+import Register from './pages/Register';
+import Login from './pages/Login';
+import AddCharityPage from './pages/AddCharityPage';
+import SelectCharityPage from './pages/SelectCharityPage';
+
+import EventWrapper from './components/EventWrapper';
+
+function App() {
+  return (
+    <Router>
+      <div className="min-h-screen bg-gray-50 text-gray-800 p-4">
+        <Routes>
+          {/* ✅ Auth Routes */}
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+
+          {/* ✅ Event Routes */}
+          <Route path="/create-event" element={<CreateEventPage />} />
+          <Route path="/update-event/:id" element={<UpdateEventWrapper />} />
+          <Route path="/event/:eventId" element={<EventWrapper><EventPage /></EventWrapper>} />
+
+          {/* ✅ Charity */}
+          <Route path="/add-charity" element={<AddCharityPage />} />
+          <Route path="/select-charity" element={<SelectCharityPage />} />
+
+          {/* ✅ Guest RSVP */}
+          <Route path="/guest/:eventId" element={<EventWrapper><GuestRSVPPage /></EventWrapper>} />
+
+          {/* ✅ Contributions */}
+          <Route path="/contribute/:eventId" element={<EventWrapper><ContributePage /></EventWrapper>} />
+          <Route path="/contributions/:eventId" element={<EventWrapper><ContributionListPage /></EventWrapper>} />
+
+          {/* ✅ 404 Fallback */}
+          <Route path="*" element={<h1 className="text-center text-xl font-semibold">404 - Page Not Found</h1>} />
+        </Routes>
+      </div>
+    </Router>
+  );
+}
+
+export default App;
