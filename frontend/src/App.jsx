@@ -122,7 +122,7 @@ import Login from './pages/Login';
 import AddCharityPage from './pages/AddCharityPage';
 import SelectCharityPage from './pages/SelectCharityPage';
 import AllEventsPage from './pages/AllEventsPage';
-
+import Dashboard from './pages/Dashboard';
 
 import EventWrapper from './components/EventWrapper';
 
@@ -151,6 +151,9 @@ function App() {
           {/* ✅ Contributions */}
           <Route path="/contribute/:eventId" element={<EventWrapper><ContributePage /></EventWrapper>} />
           <Route path="/contributions/:eventId" element={<EventWrapper><ContributionListPage /></EventWrapper>} />
+
+          {/* ✅ Dashboard */}
+          <Route path="/dashboard" element={<Dashboard />} />
 
           {/* ✅ 404 Fallback */}
           <Route path="*" element={<h1 className="text-center text-xl font-semibold">404 - Page Not Found</h1>} />

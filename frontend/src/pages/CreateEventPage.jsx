@@ -1,9 +1,12 @@
 import { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom"; // ✅ Add this
 
 export default function CreateEventForm() {
+
+    const navigate = useNavigate(); // ✅ Add this
+
     const [form, setForm] = useState({
-        host: "",
         childName: "",
         eventTitle: "",
         eventDescription: "",
@@ -45,10 +48,20 @@ export default function CreateEventForm() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        const token = localStorage.getItem("token");
         try {
-            const response = await axios.post("http://localhost:5000/api/events", form);
+            const response = await axios.post("http://localhost:5000/api/events", form, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
             console.log("Event created:", response.data);
             alert("Event created successfully!");
+
+            navigate('/dashboard');
+
+
         } catch (err) {
             console.error(err);
             alert("Failed to create event");
@@ -59,7 +72,7 @@ export default function CreateEventForm() {
         <div className="p-6 max-w-3xl mx-auto">
             <h2 className="text-2xl font-bold mb-4">Create Event</h2>
             <form onSubmit={handleSubmit} className="grid gap-4">
-                <input name="host" placeholder="Host User ID" value={form.host} onChange={handleChange} required className="border p-2 rounded" />
+
                 <input name="childName" placeholder="Child Name" value={form.childName} onChange={handleChange} required className="border p-2 rounded" />
                 <input name="eventTitle" placeholder="Event Title" value={form.eventTitle} onChange={handleChange} required className="border p-2 rounded" />
                 <textarea name="eventDescription" placeholder="Description" value={form.eventDescription} onChange={handleChange} className="border p-2 rounded" />

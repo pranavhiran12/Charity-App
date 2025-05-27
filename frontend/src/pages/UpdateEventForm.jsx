@@ -60,7 +60,6 @@ export default function UpdateEventForm({ eventId }) {
         <div className="p-6 max-w-3xl mx-auto">
             <h2 className="text-2xl font-bold mb-4">Update Event</h2>
             <form onSubmit={handleSubmit} className="grid gap-4">
-                <input name="host" placeholder="Host User ID" value={form.host} onChange={handleChange} required className="border p-2 rounded" />
                 <input name="childName" placeholder="Child Name" value={form.childName} onChange={handleChange} required className="border p-2 rounded" />
                 <input name="eventTitle" placeholder="Event Title" value={form.eventTitle} onChange={handleChange} required className="border p-2 rounded" />
                 <textarea name="eventDescription" placeholder="Description" value={form.eventDescription} onChange={handleChange} className="border p-2 rounded" />
