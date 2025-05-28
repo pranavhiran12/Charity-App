@@ -19,5 +19,6 @@ app.use('/api/charities/:id', charityRoutes);
 app.use('/api/guests', guestRoutes);
 app.use('/api/contributions', require('./routes/contribution'));
 app.use('/api/dashboard', require('./routes/dashboard'));
+app.use('/api/invitations', require('./routes/invitation'));
 
 module.exports = app;

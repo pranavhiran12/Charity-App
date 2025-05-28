@@ -50,8 +50,7 @@ router.get('/summary', authMiddlewares, async(req, res) => {
 
         const events = await Event.find({
             host: mongoose.Types.ObjectId.isValid(userId) ?
-                new mongoose.Types.ObjectId(userId) :
-                userId
+                new mongoose.Types.ObjectId(userId) : userId
         });
 
         const eventIds = events.map(event => event._id);
