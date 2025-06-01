@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import SendInvitationForm from '../components/SendInvitationForm';
+import OpenInvitation from '../components/OpenInvitation';
+import RespondInvitation from '../components/RespondInvitation';
+
 
 const Dashboard = () => {
     const [summary, setSummary] = useState(null);
@@ -109,7 +113,15 @@ const Dashboard = () => {
                     ))}
                 </ul>
             </div>
+
+            {/* Invitation Components */}
+            <div className="space-y-12">
+                <SendInvitationForm />
+                <OpenInvitation />
+                <RespondInvitation />
+            </div>
         </div>
+
     );
 };
 

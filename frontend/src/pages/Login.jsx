@@ -28,17 +28,40 @@ export default function Login() {
     };
 
     return (
-        <div className="flex justify-center items-center min-h-screen bg-gray-100">
-            <form onSubmit={handleSubmit} className="bg-white p-8 rounded shadow-md w-full max-w-md">
-                <h2 className="text-2xl font-bold mb-6">Login</h2>
-                <input name="email" type="email" placeholder="Email" value={form.email} onChange={handleChange}
-                    className="mb-4 w-full p-2 border rounded" required />
-                <input name="password" type="password" placeholder="Password" value={form.password} onChange={handleChange}
-                    className="mb-6 w-full p-2 border rounded" required />
-                <button type="submit" className="bg-green-500 text-white w-full py-2 rounded hover:bg-green-600">
-                    Login
-                </button>
-            </form>
+        <div className="d-flex align-items-center justify-content-center vh-100" style={{ backgroundColor: "#d8f3dc" }}>
+            <div className="login-card">
+                <h2 className="login-title">Welcome Back</h2>
+                <form onSubmit={handleSubmit}>
+                    <div className="mb-3">
+                        <input
+                            type="email"
+                            name="email"
+                            placeholder="Email"
+                            className="form-control"
+                            value={form.email}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+
+                    <div className="mb-3">
+                        <input
+                            type="password"
+                            name="password"
+                            placeholder="Password"
+                            className="form-control"
+                            value={form.password}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+
+                    <button type="submit" className="btn btn-green w-100">Login</button>
+
+                    <a href="/register" className="link-green">Don't have an account? Register</a>
+                </form>
+            </div>
         </div>
     );
+
 }

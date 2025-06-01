@@ -1,66 +1,7 @@
-/*const express = require('express');
-const router = express.Router();
-const Event = require('../models/Event');
-// eventRoutes.js
-const verifyToken = require('../middleware/authmiddleware');
-
-
-// Create Event
-/*router.post('/', async(req, res) => {
-    try {
-        const event = new Event(req.body);
-        await event.save();
-        res.status(201).json(event);
-    } catch (err) {
-        res.status(400).json({ error: err.message });
-    }
-});*/
-
-//Create Event
-// routes/eventRoutes.js
 const express = require('express');
 const router = express.Router();
 const Event = require('../models/Event');
 const verifyToken = require('../middleware/authmiddleware');
-
-/*router.post('/', verifyToken, async(req, res) => {
-    try {
-        const {
-            childName,
-            eventTitle,
-            eventDescription,
-            eventDate,
-            eventImage,
-            giftName,
-            charity,
-            totalTargetAmount,
-            splitPercentage,
-            guestsInvited,
-            status
-        } = req.body;
-        
-
-        const event = new Event({
-            host: req.userId,
-            childName,
-            eventTitle,
-            eventDescription,
-            eventDate,
-            eventImage,
-            giftName,
-            charity,
-            totalTargetAmount,
-            splitPercentage,
-            guestsInvited,
-            status
-        });
-
-        await event.save();
-        res.status(201).json(event);
-    } catch (err) {
-        res.status(500).json({ message: 'Failed to create event', error: err.message });
-    }
-});*/
 
 router.post('/', verifyToken, async(req, res) => {
     try {

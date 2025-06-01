@@ -126,6 +126,13 @@ import Dashboard from './pages/Dashboard';
 
 import EventWrapper from './components/EventWrapper';
 
+/*import SendInvitationForm from './components/SendInvitationForm';
+import OpenInvitation from './components/OpenInvitation';
+import RespondInvitation from './components/RespondInvitation';*/
+
+
+
+
 function App() {
   return (
     <Router>
@@ -154,6 +161,7 @@ function App() {
 
           {/* ✅ Dashboard */}
           <Route path="/dashboard" element={<Dashboard />} />
+
 
           {/* ✅ 404 Fallback */}
           <Route path="*" element={<h1 className="text-center text-xl font-semibold">404 - Page Not Found</h1>} />

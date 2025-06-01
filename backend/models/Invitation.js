@@ -20,6 +20,9 @@ const invitationSchema = new mongoose.Schema({
         enum: ['sent', 'opened', 'responded'],
         default: 'sent'
     },
+    message: {
+        type: String
+    },
     respondedAt: Date
 });
 

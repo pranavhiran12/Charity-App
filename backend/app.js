@@ -15,10 +15,12 @@ const guestRoutes = require('./routes/guest');
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/charities', charityRoutes);
-app.use('/api/charities/:id', charityRoutes);
+//app.use('/api/charities/:id', charityRoutes);
 app.use('/api/guests', guestRoutes);
 app.use('/api/contributions', require('./routes/contribution'));
 app.use('/api/dashboard', require('./routes/dashboard'));
-app.use('/api/invitations', require('./routes/invitation'));
+
+console.log("➡️ Registering invitation route");
+app.use('/invitations', require('./routes/invitationRoute'));
 
 module.exports = app;

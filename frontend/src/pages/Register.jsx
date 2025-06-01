@@ -1,8 +1,10 @@
 import { useState } from "react";
 import axios from "axios";
+import { useNavigate } from 'react-router-dom';
 
 export default function Register() {
     const [form, setForm] = useState({ name: "", email: "", password: "" });
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -12,27 +14,60 @@ export default function Register() {
         e.preventDefault();
         try {
             const res = await axios.post("http://localhost:5000/api/auth/register", form);
-            console.log(res.data); // or use res.data.token, etc.
-            alert("Registered successfully!");
+            alert("Registration successful!");
+            localStorage.setItem('token', res.data.token);
+            navigate('/dashboard');
         } catch (err) {
-            alert("Registration failed: " + err.response?.data?.message || err.message);
+            alert("Registration failed: " + (err.response?.data?.message || err.message));
         }
     };
 
     return (
-        <div className="flex justify-center items-center min-h-screen bg-gray-100">
-            <form onSubmit={handleSubmit} className="bg-white p-8 rounded shadow-md w-full max-w-md">
-                <h2 className="text-2xl font-bold mb-6">Register</h2>
-                <input name="name" placeholder="Name" value={form.name} onChange={handleChange}
-                    className="mb-4 w-full p-2 border rounded" required />
-                <input name="email" type="email" placeholder="Email" value={form.email} onChange={handleChange}
-                    className="mb-4 w-full p-2 border rounded" required />
-                <input name="password" type="password" placeholder="Password" value={form.password} onChange={handleChange}
-                    className="mb-6 w-full p-2 border rounded" required />
-                <button type="submit" className="bg-blue-500 text-white w-full py-2 rounded hover:bg-blue-600">
-                    Register
-                </button>
-            </form>
+        <div className="d-flex align-items-center justify-content-center vh-100" style={{ backgroundColor: "#d8f3dc" }}>
+            <div className="login-card">
+                <h2 className="login-title">Create an Account</h2>
+                <form onSubmit={handleSubmit}>
+                    <div className="mb-3">
+                        <input
+                            type="text"
+                            name="name"
+                            placeholder="Full Name"
+                            className="form-control"
+                            value={form.name}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+
+                    <div className="mb-3">
+                        <input
+                            type="email"
+                            name="email"
+                            placeholder="Email"
+                            className="form-control"
+                            value={form.email}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+
+                    <div className="mb-3">
+                        <input
+                            type="password"
+                            name="password"
+                            placeholder="Password"
+                            className="form-control"
+                            value={form.password}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+
+                    <button type="submit" className="btn btn-green w-100">Register</button>
+
+                    <a href="/login" className="link-green">Already have an account? Login</a>
+                </form>
+            </div>
         </div>
     );
 }
