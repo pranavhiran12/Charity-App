@@ -1,21 +1,30 @@
+// TOP: keep your existing imports
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import SendInvitationForm from '../components/SendInvitationForm';
-import OpenInvitation from '../components/OpenInvitation';
-import RespondInvitation from '../components/RespondInvitation';
-
+import { useNavigate, Link } from 'react-router-dom';
 
 const Dashboard = () => {
     const [summary, setSummary] = useState(null);
     const [events, setEvents] = useState([]);
+    const [guests, setGuests] = useState({}); // guests[eventId] = [guest, guest]
+    const [invites, setInvites] = useState({}); // invites[eventId-guestId] = code
     const token = localStorage.getItem('token');
     const navigate = useNavigate();
 
-    // 🚪 Logout handler
     const handleLogout = () => {
         localStorage.removeItem('token');
         navigate('/login');
+    };
+
+    const fetchGuests = async (eventId) => {
+        try {
+            const res = await axios.get(`http://localhost:5000/api/guests/event/${eventId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setGuests(prev => ({ ...prev, [eventId]: res.data }));
+        } catch (err) {
+            console.error('Error fetching guests:', err);
+        }
     };
 
     useEffect(() => {
@@ -45,12 +54,12 @@ const Dashboard = () => {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setEvents(res.data);
+
+                res.data.forEach(event => {
+                    fetchGuests(event._id);
+                });
             } catch (err) {
                 console.error('Error fetching events:', err);
-                if (err.response?.status === 401) {
-                    localStorage.removeItem('token');
-                    navigate('/login');
-                }
             }
         };
 
@@ -58,70 +67,158 @@ const Dashboard = () => {
         fetchEvents();
     }, [token, navigate]);
 
+    const handleGenerateInvitation = async (eventId, guestId) => {
+        console.log('Generating invitation for:', eventId, guestId);
+        try {
+            const res = await axios.post(
+                `http://localhost:5000/invitations/autolink`,
+                { eventId, guestId },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            console.log('Invitation code received:', res.data.invitationCode);
+
+            setInvites(prev => ({
+                ...prev,
+                [`${eventId}-${guestId}`]: res.data.invitationCode
+            }));
+        } catch (err) {
+            console.error("Invitation error:", err);
+            if (err.response) {
+                console.error("Server response:", err.response.data);
+                alert("Failed to generate invitation: " + (err.response.data?.message || "Server error"));
+            } else if (err.request) {
+                console.error("No response received:", err.request);
+                alert("No response from server. Check your backend.");
+            } else {
+                console.error("Error setting up request:", err.message);
+                alert("Request setup error: " + err.message);
+            }
+        }
+    };
+
     if (!summary) return <div className="p-6 text-center">Loading Dashboard...</div>;
 
     return (
-        <div className="p-6">
-            {/* Header with Logout Button */}
-            <div className="flex justify-between items-center mb-6">
+        <div className="p-6 max-w-6xl mx-auto">
+            <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold">📊 Dashboard Overview</h1>
-                <button
-                    onClick={handleLogout}
-                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                >
+                <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
                     Logout
                 </button>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-6">
-                <div className="bg-white shadow p-4 rounded">
-                    <h2 className="text-xl font-semibold">Total Events</h2>
-                    <p className="text-2xl">{summary.totalEvents}</p>
-                </div>
-                <div className="bg-white shadow p-4 rounded">
-                    <h2 className="text-xl font-semibold">Total Guests</h2>
-                    <p className="text-2xl">{summary.totalGuests}</p>
-                </div>
-                <div className="bg-white shadow p-4 rounded">
-                    <h2 className="text-xl font-semibold">Total Contributions</h2>
-                    <p className="text-2xl">{summary.totalContributions}</p>
-                </div>
-                <div className="bg-green-50 shadow p-4 rounded">
-                    <h2 className="text-xl font-semibold">Total Gift Amount</h2>
-                    <p className="text-2xl text-green-600">${summary.totalGiftAmount}</p>
-                </div>
-                <div className="bg-blue-50 shadow p-4 rounded">
-                    <h2 className="text-xl font-semibold">Total Charity Amount</h2>
-                    <p className="text-2xl text-blue-600">${summary.totalCharityAmount}</p>
-                </div>
+            {/* Summary Cards (placeholder) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-10">
+                {/* You can map summary data here */}
             </div>
 
-            {/* Events List */}
-            <div className="bg-white p-4 shadow rounded">
-                <h2 className="text-xl font-bold mb-4">📅 Your Events</h2>
-                <ul className="space-y-2">
-                    {events.map(event => (
-                        <li
-                            key={event._id}
-                            className="border rounded p-2 hover:bg-gray-50 cursor-pointer"
-                            onClick={() => navigate(`/event/${event._id}`)}
-                        >
-                            <div className="font-medium">{event.eventTitle}</div>
-                            <div className="text-sm text-gray-600">{new Date(event.eventDate).toLocaleDateString()}</div>
+            {/* Events Section */}
+            <div className="bg-white p-6 shadow rounded mb-10">
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-bold">📅 Your Events</h2>
+                    <Link to="/create-event" className="bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700">
+                        ➕ Create New Event
+                    </Link>
+                </div>
+
+                <ul className="space-y-6">
+                    {events.map((event) => (
+                        <li key={event._id} className="border rounded p-4 hover:bg-gray-50">
+                            <div
+                                onClick={() => navigate(`/event/${event._id}`)}
+                                className="cursor-pointer"
+                            >
+                                <div className="font-medium text-lg">{event.eventTitle}</div>
+                                <div className="text-sm text-gray-600">
+                                    {new Date(event.eventDate).toLocaleDateString()}
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => fetchGuests(event._id)}
+                                className="text-sm text-blue-500 underline hover:text-blue-700 ml-4"
+                            >
+                                🔄 Refresh Guests
+                            </button>
+
+                            <div className="mt-2 space-x-4 text-sm">
+                                <Link to={`/guest/${event._id}`} className="text-blue-600 hover:underline">
+                                    📩 RSVP as Guest
+                                </Link>
+                                <Link to={`/event/${event._id}/guests`} className="text-green-600 hover:underline">
+                                    👥 View Guests
+                                </Link>
+                                <Link to={`/contributions/${event._id}`} className="text-purple-600 hover:underline">
+                                    💰 View Contributions
+                                </Link>
+                            </div>
+
+
+                            {/* Guest List and Invitations */}
+                            <div className="mt-4 space-y-2">
+                                <div className="font-medium text-sm text-gray-800 mb-1">Guest Invitations:</div>
+                                {guests[event._id]?.map(guest => (
+                                    <div key={guest._id} className="flex items-center justify-between text-sm border rounded px-2 py-1">
+                                        <div className="flex flex-col">
+                                            <span className="font-medium">{guest.name} ({guest.email})</span>
+                                            <span className="text-xs mt-1">
+                                                Status:{" "}
+                                                <span className={`
+px-2 py-0.5 rounded-full font-semibold w-fit
+    ${guest.status?.toLowerCase() === 'accepted' ? 'bg-green-100 text-green-700' :
+                                                        guest.status?.toLowerCase() === 'declined' ? 'bg-red-100 text-red-700' :
+                                                            'bg-yellow-100 text-yellow-700'}
+  `}>
+                                                    {guest.status ? guest.status.charAt(0).toUpperCase() + guest.status.slice(1).toLowerCase() : 'Pending'}
+                                                </span>
+                                            </span>
+
+                                        </div>
+                                        {invites[`${event._id}-${guest._id}`] ? (
+                                            <a
+                                                href={`http://localhost:5173/invite/${invites[`${event._id}-${guest._id}`]}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-600 underline"
+                                            >
+                                                View Invite
+                                            </a>
+                                        ) : (
+                                            <button
+                                                onClick={() => handleGenerateInvitation(event._id, guest._id)}
+                                                className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
+                                            >
+                                                Generate Link
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+
                         </li>
                     ))}
                 </ul>
             </div>
 
-            {/* Invitation Components */}
-            <div className="space-y-12">
-                <SendInvitationForm />
-                <OpenInvitation />
-                <RespondInvitation />
+            {/* Charities Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                <div className="bg-white rounded-2xl shadow p-6">
+                    <h2 className="text-xl font-semibold mb-3">🎁 Charities</h2>
+                    <ul className="space-y-2">
+                        <li>
+                            <Link to="/add-charity" className="text-blue-600 hover:underline">
+                                ➕ Add New Charity
+                            </Link>
+                        </li>
+                        <li>
+                            <Link to="/select-charity" className="text-blue-600 hover:underline">
+                                🎯 Select Charity
+                            </Link>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
-
     );
 };
 

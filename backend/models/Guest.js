@@ -12,6 +12,11 @@ const guestSchema = new mongoose.Schema({
         type: String,
         enum: ["Yes", "No", "Maybe"],
         default: "Maybe"
+    },
+    status: {
+        type: String,
+        enum: ['accepted', 'declined', 'pending'],
+        default: 'pending'
     }
 }, { timestamps: true });
 

@@ -1,20 +1,5 @@
 const mongoose = require('mongoose');
 
-const contributionSchema = new mongoose.Schema({
-    guestName: String,
-    guestEmail: String,
-    amount: {
-        type: Number,
-        required: true,
-        min: 0
-    },
-    message: String,
-    contributedAt: {
-        type: Date,
-        default: Date.now
-    }
-});
-
 const eventSchema = new mongoose.Schema({
     host: {
         type: mongoose.Schema.Types.ObjectId,
@@ -58,13 +43,6 @@ const eventSchema = new mongoose.Schema({
         charity: { type: Number, default: 50 }
     },
 
-    totalTargetAmount: {
-        type: Number,
-        required: true
-    },
-
-    contributions: [contributionSchema],
-
     guestsInvited: [{
         name: String,
         email: String,
@@ -81,9 +59,6 @@ const eventSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     }
-
-
-
 });
 
 module.exports = mongoose.model('Event', eventSchema);

@@ -1,29 +1,31 @@
 const mongoose = require('mongoose');
 
 const invitationSchema = new mongoose.Schema({
-    event: {
+    eventId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Event',
         required: true
     },
-    guestEmail: {
-        type: String,
+    guestId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Guest',
         required: true
     },
-    token: {
+    invitationCode: {
         type: String,
         required: true,
         unique: true
     },
     status: {
         type: String,
-        enum: ['sent', 'opened', 'responded'],
-        default: 'sent'
+        enum: ['pending', 'accepted', 'declined'],
+        default: 'pending'
     },
-    message: {
-        type: String
-    },
-    respondedAt: Date
+    respondedAt: {
+        type: Date
+    }
+}, {
+    timestamps: true
 });
 
 module.exports = mongoose.model('Invitation', invitationSchema);

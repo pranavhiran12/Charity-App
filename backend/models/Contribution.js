@@ -1,29 +1,24 @@
-// models/Contribution.js
 const mongoose = require('mongoose');
 
 const contributionSchema = new mongoose.Schema({
-    guest: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Guest',
-        required: true
-    },
-    event: {
+    eventId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Event',
+        required: true
+    },
+    guestId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Guest',
         required: true
     },
     amount: {
         type: Number,
         required: true,
-        min: 1
+        min: 0
     },
-    paymentStatus: {
+    message: {
         type: String,
-        enum: ['pending', 'completed', 'failed'],
-        default: 'pending'
-    },
-    paymentMethod: {
-        type: String, // e.g. 'credit_card', 'paypal'
+        trim: true
     },
     contributedAt: {
         type: Date,

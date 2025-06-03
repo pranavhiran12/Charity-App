@@ -1,41 +1,16 @@
-// src/pages/EventPage.jsx
-import React, { useEffect, useState } from 'react';
-import api from '../api/api';
+import React from "react";
+import { useParams } from "react-router-dom";
+import GuestList from "../components/GuestList";
 
-const EventPage = ({ eventId }) => {
-    const [event, setEvent] = useState(null);
-    const [total, setTotal] = useState(0);
-
-    useEffect(() => {
-        const fetchEvent = async () => {
-            const res = await api.get(`/events/${eventId}`);
-            setEvent(res.data);
-        };
-        const fetchTotal = async () => {
-            const res = await api.get(`/contributions/${eventId}/total`);
-            setTotal(res.data.totalAmountRaised);
-        };
-
-        fetchEvent();
-        fetchTotal();
-    }, [eventId]);
-
-    if (!event) return <p className="text-center">Loading...</p>;
+export default function GuestListPage() {
+    const { id: eventId } = useParams();
 
     return (
-        <div className="max-w-3xl mx-auto p-4">
-            <h1 className="text-3xl font-bold mb-2">{event.eventTitle}</h1>
-            <p className="mb-2 text-gray-600">{event.eventDescription}</p>
-            <p className="text-blue-600 font-semibold">Total Raised: ${total}</p>
-
-            <h2 className="mt-6 text-xl font-semibold">Guest List</h2>
-            <ul className="list-disc ml-6">
-                {event.guestsInvited.map((guest, idx) => (
-                    <li key={idx}>{guest.name} ({guest.email})</li>
-                ))}
-            </ul>
+        <div className="p-6">
+            <h1 className="text-2xl font-bold mb-4">Guests for this Event</h1>
+            <GuestList eventId={eventId} />
         </div>
     );
-};
+}
 
-export default EventPage;
+

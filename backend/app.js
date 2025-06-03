@@ -10,6 +10,7 @@ const eventRoutes = require('./routes/eventRoutes');
 const authRoutes = require('./routes/auth'); // optional
 const charityRoutes = require('./routes/charityRoutes');
 const guestRoutes = require('./routes/guest');
+const contributionRoutes = require('./routes/contribution');
 
 // Register routes
 app.use('/api/auth', authRoutes);
@@ -19,6 +20,7 @@ app.use('/api/charities', charityRoutes);
 app.use('/api/guests', guestRoutes);
 app.use('/api/contributions', require('./routes/contribution'));
 app.use('/api/dashboard', require('./routes/dashboard'));
+app.use('/api/contributions', contributionRoutes);
 
 console.log("➡️ Registering invitation route");
 app.use('/invitations', require('./routes/invitationRoute'));
