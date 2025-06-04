@@ -91,7 +91,7 @@ const Dashboard = () => {
         <div className="p-6 max-w-6xl mx-auto">
             <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold">📊 Dashboard Overview</h1>
-                <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                <button onClick={handleLogout} className="bg-blue-600 text-green-300 px-4 py-2 rounded hover:bg-blue-700">
                     Logout
                 </button>
             </div>
@@ -128,7 +128,7 @@ const Dashboard = () => {
                                 </Link>
                                 <button
                                     onClick={() => navigate(`/event/${event._id}/contributions`)}
-                                    className="bg-green-600 text-white px-3 py-1 rounded"
+                                    className="bg-blue-600 text-green-300 px-4 py-2 rounded hover:bg-blue-700"
                                 >
                                     View Contributions
                                 </button>
@@ -159,7 +159,7 @@ const Dashboard = () => {
                                             ) : (
                                                 <button
                                                     onClick={() => handleGenerateInvitation(event._id, guest._id)}
-                                                    className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
+                                                    className="bg-blue-600 text-green-300 px-4 py-2 rounded hover:bg-blue-700"
                                                 >
                                                     Generate Link
                                                 </button>
@@ -172,7 +172,7 @@ const Dashboard = () => {
                                 <div className="mt-4 text-right">
                                     <button
                                         onClick={() => navigate(`/contribute/${event._id}`)}
-                                        className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+                                        className="bg-blue-600 text-green-300 px-4 py-2 rounded hover:bg-blue-700"
                                     >
                                         💰 Contribute to this Event
                                     </button>

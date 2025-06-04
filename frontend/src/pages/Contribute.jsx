@@ -1,11 +1,13 @@
 import { useParams } from 'react-router-dom';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 export default function Contribute() {
     const { eventId } = useParams();
     const [form, setForm] = useState({ name: '', email: '', amount: '', message: '' });
     const [response, setResponse] = useState('');
+    const navigate = useNavigate();
 
     const handleChange = e => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -38,6 +40,13 @@ export default function Contribute() {
             if (contributionRes.status === 200 || contributionRes.status === 201) {
                 setResponse('🎉 Contribution successful!');
                 setForm({ name: '', email: '', amount: '', message: '' }); // Clear form
+
+
+                setTimeout(() => {
+                    navigate('/dashboard');
+                }, 2000);
+
+
             } else {
                 setResponse('⚠️ Failed to submit contribution. Please try again.');
             }
@@ -56,7 +65,9 @@ export default function Contribute() {
 
     return (
         <div className="max-w-md mx-auto p-6 bg-white rounded shadow">
-            <h2 className="text-xl font-bold mb-4">Contribute to the Event</h2>
+            <h2 className="bg-blue-600 text-green-300 px-4 py-2 rounded hover:bg-blue-700">
+                Contribute to the Event
+            </h2>
             <form onSubmit={handleSubmit} className="space-y-3">
                 <input
                     name="name"
@@ -91,9 +102,11 @@ export default function Contribute() {
                     onChange={handleChange}
                     className="w-full p-2 border rounded"
                 />
-                <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                <button type="submit" className="bg-blue-600 text-green-300 px-4 py-2 rounded hover:bg-blue-700">
                     Contribute
                 </button>
+
+
             </form>
             {response && <p className="mt-4 text-green-600 font-medium">{response}</p>}
         </div>
