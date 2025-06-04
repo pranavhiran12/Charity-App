@@ -6,8 +6,8 @@ import { useNavigate, Link } from 'react-router-dom';
 const Dashboard = () => {
     const [summary, setSummary] = useState(null);
     const [events, setEvents] = useState([]);
-    const [guests, setGuests] = useState({}); // guests[eventId] = [guest, guest]
-    const [invites, setInvites] = useState({}); // invites[eventId-guestId] = code
+    const [guests, setGuests] = useState({});
+    const [invites, setInvites] = useState({});
     const token = localStorage.getItem('token');
     const navigate = useNavigate();
 
@@ -68,7 +68,6 @@ const Dashboard = () => {
     }, [token, navigate]);
 
     const handleGenerateInvitation = async (eventId, guestId) => {
-        console.log('Generating invitation for:', eventId, guestId);
         try {
             const res = await axios.post(
                 `http://localhost:5000/invitations/autolink`,
@@ -76,24 +75,13 @@ const Dashboard = () => {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            console.log('Invitation code received:', res.data.invitationCode);
-
             setInvites(prev => ({
                 ...prev,
                 [`${eventId}-${guestId}`]: res.data.invitationCode
             }));
         } catch (err) {
             console.error("Invitation error:", err);
-            if (err.response) {
-                console.error("Server response:", err.response.data);
-                alert("Failed to generate invitation: " + (err.response.data?.message || "Server error"));
-            } else if (err.request) {
-                console.error("No response received:", err.request);
-                alert("No response from server. Check your backend.");
-            } else {
-                console.error("Error setting up request:", err.message);
-                alert("Request setup error: " + err.message);
-            }
+            alert("Failed to generate invitation: " + (err.response?.data?.message || "Server error"));
         }
     };
 
@@ -108,12 +96,8 @@ const Dashboard = () => {
                 </button>
             </div>
 
-            {/* Summary Cards (placeholder) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-10">
-                {/* You can map summary data here */}
-            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-10"></div>
 
-            {/* Events Section */}
             <div className="bg-white p-6 shadow rounded mb-10">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-bold">📅 Your Events</h2>
@@ -125,19 +109,13 @@ const Dashboard = () => {
                 <ul className="space-y-6">
                     {events.map((event) => (
                         <li key={event._id} className="border rounded p-4 hover:bg-gray-50">
-                            <div
-                                onClick={() => navigate(`/event/${event._id}`)}
-                                className="cursor-pointer"
-                            >
+                            <div onClick={() => navigate(`/event/${event._id}`)} className="cursor-pointer">
                                 <div className="font-medium text-lg">{event.eventTitle}</div>
                                 <div className="text-sm text-gray-600">
                                     {new Date(event.eventDate).toLocaleDateString()}
                                 </div>
                             </div>
-                            <button
-                                onClick={() => fetchGuests(event._id)}
-                                className="text-sm text-blue-500 underline hover:text-blue-700 ml-4"
-                            >
+                            <button onClick={() => fetchGuests(event._id)} className="text-sm text-blue-500 underline hover:text-blue-700 ml-4">
                                 🔄 Refresh Guests
                             </button>
 
@@ -148,13 +126,14 @@ const Dashboard = () => {
                                 <Link to={`/event/${event._id}/guests`} className="text-green-600 hover:underline">
                                     👥 View Guests
                                 </Link>
-                                <Link to={`/contributions/${event._id}`} className="text-purple-600 hover:underline">
-                                    💰 View Contributions
-                                </Link>
+                                <button
+                                    onClick={() => navigate(`/event/${event._id}/contributions`)}
+                                    className="bg-green-600 text-white px-3 py-1 rounded"
+                                >
+                                    View Contributions
+                                </button>
                             </div>
 
-
-                            {/* Guest List and Invitations */}
                             <div className="mt-4 space-y-2">
                                 <div className="font-medium text-sm text-gray-800 mb-1">Guest Invitations:</div>
                                 {guests[event._id]?.map(guest => (
@@ -162,37 +141,42 @@ const Dashboard = () => {
                                         <div className="flex flex-col">
                                             <span className="font-medium">{guest.name} ({guest.email})</span>
                                             <span className="text-xs mt-1">
-                                                Status:{" "}
-                                                <span className={`
-px-2 py-0.5 rounded-full font-semibold w-fit
-    ${guest.status?.toLowerCase() === 'accepted' ? 'bg-green-100 text-green-700' :
-                                                        guest.status?.toLowerCase() === 'declined' ? 'bg-red-100 text-red-700' :
-                                                            'bg-yellow-100 text-yellow-700'}
-  `}>
+                                                Status: <span className={`px-2 py-0.5 rounded-full font-semibold w-fit ${guest.status?.toLowerCase() === 'accepted' ? 'bg-green-100 text-green-700' : guest.status?.toLowerCase() === 'declined' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
                                                     {guest.status ? guest.status.charAt(0).toUpperCase() + guest.status.slice(1).toLowerCase() : 'Pending'}
                                                 </span>
                                             </span>
-
                                         </div>
-                                        {invites[`${event._id}-${guest._id}`] ? (
-                                            <a
-                                                href={`http://localhost:5173/invite/${invites[`${event._id}-${guest._id}`]}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-blue-600 underline"
-                                            >
-                                                View Invite
-                                            </a>
-                                        ) : (
-                                            <button
-                                                onClick={() => handleGenerateInvitation(event._id, guest._id)}
-                                                className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
-                                            >
-                                                Generate Link
-                                            </button>
-                                        )}
+                                        <div className="flex gap-2">
+                                            {invites[`${event._id}-${guest._id}`] ? (
+                                                <a
+                                                    href={`http://localhost:5173/invite/${invites[`${event._id}-${guest._id}`]}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-blue-600 underline"
+                                                >
+                                                    View Invite
+                                                </a>
+                                            ) : (
+                                                <button
+                                                    onClick={() => handleGenerateInvitation(event._id, guest._id)}
+                                                    className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
+                                                >
+                                                    Generate Link
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                 ))}
+
+                                {/* ✅ One Contribute Button Below All Guests */}
+                                <div className="mt-4 text-right">
+                                    <button
+                                        onClick={() => navigate(`/contribute/${event._id}`)}
+                                        className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+                                    >
+                                        💰 Contribute to this Event
+                                    </button>
+                                </div>
                             </div>
 
                         </li>
@@ -200,7 +184,6 @@ px-2 py-0.5 rounded-full font-semibold w-fit
                 </ul>
             </div>
 
-            {/* Charities Section */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
                 <div className="bg-white rounded-2xl shadow p-6">
                     <h2 className="text-xl font-semibold mb-3">🎁 Charities</h2>

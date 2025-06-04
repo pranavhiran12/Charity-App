@@ -3,15 +3,16 @@ const router = express.Router();
 const Contribution = require('../models/Contribution');
 const Guest = require('../models/Guest');
 const Event = require('../models/Event');
+const mongoose = require('mongoose');
 
 // @route   POST /api/contributions
 // @desc    Add a contribution
 router.post('/', async(req, res) => {
-    const { eventId, guestId, amount, message } = req.body;
-
     try {
+        const { eventId, guestId, amount, message } = req.body;
+
         if (!eventId || !guestId || !amount) {
-            return res.status(400).json({ message: 'Missing required fields' });
+            return res.status(400).json({ message: 'eventId, guestId and amount are required' });
         }
 
         const contribution = new Contribution({
@@ -21,11 +22,36 @@ router.post('/', async(req, res) => {
             message
         });
 
-        await contribution.save();
-        res.status(201).json({ message: 'Contribution added successfully', contribution });
+        const saved = await contribution.save();
+        res.status(201).json(saved);
+    } catch (error) {
+        console.error('Error saving contribution:', error);
+        res.status(500).json({ message: 'Something went wrong' });
+    }
+});
+
+router.post('/direct', async(req, res) => {
+    const { eventId, name, email, amount, message } = req.body;
+
+    if (!eventId || !name || !email || !amount) {
+        return res.status(400).json({ message: 'eventId, name, email, and amount are required' });
+    }
+
+    try {
+        const newContribution = new Contribution({
+            eventId,
+            name,
+            email,
+            amount,
+            message
+        });
+
+        await newContribution.save();
+
+        res.status(201).json({ message: 'Contribution successful', contribution: newContribution });
     } catch (err) {
-        console.error('Error adding contribution:', err);
-        res.status(500).json({ message: 'Server error' });
+        console.error('Server error:', err);
+        res.status(500).json({ message: 'Server error while saving contribution.' });
     }
 });
 
@@ -34,10 +60,10 @@ router.post('/', async(req, res) => {
 router.get('/event/:eventId', async(req, res) => {
     try {
         const contributions = await Contribution.find({ eventId: req.params.eventId })
-            .populate('guestId', 'name email') // Fetch guest info
-            .sort({ contributedAt: -1 });
+            .sort({ amount: -1, createdAt: -1 }) // Leaderboard: Highest amount first
+            .select('name email amount message createdAt'); // Only select needed fields
 
-        res.json(contributions);
+        res.status(200).json(contributions);
     } catch (err) {
         console.error('Error fetching event contributions:', err);
         res.status(500).json({ message: 'Server error' });
@@ -77,26 +103,26 @@ router.get('/:id', async(req, res) => {
 
 
 // GET /api/contributions/total/:eventId
+// @route   GET /api/contributions/total/:eventId
+// @desc    Get total contributions for a specific event
 router.get('/total/:eventId', async(req, res) => {
     try {
+        const eventObjectId = new mongoose.Types.ObjectId(req.params.eventId);
+
         const total = await Contribution.aggregate([
-            { $match: { eventId: new mongoose.Types.ObjectId(req.params.eventId) } },
+            { $match: { eventId: eventObjectId } },
             { $group: { _id: null, totalAmount: { $sum: '$amount' } } }
         ]);
 
-        // Assuming 'total' is the result of an aggregation query
-        if (total.length > 0 && total[0].totalAmount) {
-            res.json({ totalAmount: total[0].totalAmount });
-        } else {
-            res.json({ totalAmount: 0 });
-        }
+        const totalAmount = total.length > 0 ? total[0].totalAmount : 0;
 
-
+        res.json({ totalAmount });
     } catch (err) {
         console.error('Error calculating total contributions:', err);
         res.status(500).json({ message: 'Server error' });
     }
 });
+
 
 
 // @route   DELETE /api/contributions/:id

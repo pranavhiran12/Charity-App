@@ -115,6 +115,36 @@ router.post("/event/:eventId", async(req, res) => {
     }
 });
 
+// GET /api/guests/by-email?eventId=...&email=...
+router.get('/by-email', async(req, res) => {
+    try {
+        const { eventId, email } = req.query;
+
+        if (!eventId || !email) {
+            return res.status(400).json({ message: 'Missing eventId or email' });
+        }
+
+        const guest = await Guest.findOne({ eventId, email });
+
+        if (!guest) {
+            return res.status(404).json({ message: 'Guest not found' });
+        }
+
+        res.json(guest);
+    } catch (error) {
+        console.error('Error fetching guest by email:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+router.get('/find', async(req, res) => {
+    const { eventId, email } = req.query;
+    const guest = await Guest.findOne({ eventId, email });
+    if (!guest) return res.status(404).json(null);
+    res.json(guest);
+});
+
+
 // ✅ Get all guests for an event
 router.get("/event/:eventId", async(req, res) => {
     try {
