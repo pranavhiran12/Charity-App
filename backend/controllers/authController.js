@@ -1,14 +1,11 @@
-const router = require('express').Router();
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-// Register new user
-router.post('/register', async(req, res) => {
+exports.registerUser = async(req, res) => {
     try {
         const { email, password } = req.body;
 
-        // Check if user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ error: 'Email already in use' });
@@ -22,10 +19,9 @@ router.post('/register', async(req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
-});
+};
 
-// Login user
-router.post('/login', async(req, res) => {
+exports.loginUser = async(req, res) => {
     try {
         const { email, password } = req.body;
 
@@ -41,6 +37,4 @@ router.post('/login', async(req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
-});
-
-module.exports = router;
+};

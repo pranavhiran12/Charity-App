@@ -85,6 +85,30 @@ const Dashboard = () => {
         }
     };
 
+
+    const handleInvite = async (eventId) => {
+        try {
+            const res = await axios.post(`http://localhost:5000/invitations/send/${eventId}`);
+            const baseUrl = "http://localhost:517/invite"; // or your deployed URL
+            const links = res.data.map(invite => `${baseUrl}/${invite.invitationCode}`);
+
+            // Copy links to clipboard
+            await navigator.clipboard.writeText(links.join('\n'));
+
+            // Log them for reference
+            console.log("🔗 Invitation Links:");
+            links.forEach(link => console.log(link));
+
+            alert("Invitations sent & links copied to clipboard!");
+        } catch (err) {
+            console.error("❌ Invitation error:", err.response?.data || err.message);
+            alert("Failed to send invitations.");
+        }
+    };
+
+
+
+
     if (!summary) return <div className="p-6 text-center">Loading Dashboard...</div>;
 
     return (
@@ -149,7 +173,7 @@ const Dashboard = () => {
                                         <div className="flex gap-2">
                                             {invites[`${event._id}-${guest._id}`] ? (
                                                 <a
-                                                    href={`http://localhost:5173/invite/${invites[`${event._id}-${guest._id}`]}`}
+                                                    href={`http://localhost:5174/invite/${invites[`${event._id}-${guest._id}`]}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="text-blue-600 underline"
@@ -177,6 +201,16 @@ const Dashboard = () => {
                                         💰 Contribute to this Event
                                     </button>
                                 </div>
+
+                                <button
+                                    onClick={() => handleInvite(event._id)}
+                                    className="bg-blue-600 text-green-300 px-4 py-2 rounded hover:bg-blue-700"
+                                >
+                                    Send Invitation
+                                </button>
+
+
+
                             </div>
 
                         </li>

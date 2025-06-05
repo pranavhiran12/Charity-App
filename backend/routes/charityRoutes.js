@@ -1,15 +1,10 @@
 const router = require('express').Router();
-const Charity = require('../models/Charity');
+const {
+    getAllCharities,
+    createCharity,
+} = require('../controllers/charityController');
 
-router.get('/', async(req, res) => {
-    const charities = await Charity.find();
-    res.json(charities);
-});
-
-router.post('/', async(req, res) => {
-    const charity = new Charity(req.body);
-    await charity.save();
-    res.status(201).json(charity);
-});
+router.get('/', getAllCharities);
+router.post('/', createCharity);
 
 module.exports = router;

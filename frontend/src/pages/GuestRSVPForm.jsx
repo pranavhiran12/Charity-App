@@ -41,7 +41,7 @@ const GuestRSVPForm = ({ eventId: propEventId }) => {
             localStorage.setItem('guestId', res.data.guest._id);
 
             // Redirect to contribute page or show success message
-            navigate(`/contribute/${eventId}`);
+            navigate(`/dashboard`);
         } catch (err) {
             console.error("RSVP failed:", err.response?.data || err.message);
             setError(err.response?.data?.error || "Something went wrong");
@@ -89,7 +89,7 @@ const GuestRSVPForm = ({ eventId: propEventId }) => {
                 </select>
                 <button
                     type="submit"
-                    className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+                    className="bg-blue-600 text-green-300 px-4 py-2 rounded hover:bg-blue-700"
                 >
                     Submit RSVP
                 </button>

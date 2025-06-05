@@ -8,7 +8,7 @@ export default function GenerateInvite() {
 
     const handleGenerate = async () => {
         try {
-            const res = await axios.get(`http://localhost:5000/api/invitations/autolink?eventId=${eventId}&guestId=${guestId}`);
+            const res = await axios.get(`http://localhost:5000/invitations/autolink?eventId=${eventId}&guestId=${guestId}`);
             setCode(res.data.invitationCode);
         } catch (err) {
             console.error("Error generating invitation", err);

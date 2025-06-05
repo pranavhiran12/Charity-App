@@ -9,12 +9,9 @@ const ViewGuests = () => {
     const [error, setError] = useState("");
 
     useEffect(() => {
-
-        console.log("Event ID:", eventId); // Debug line
         const fetchGuests = async () => {
             try {
                 const res = await axios.get(`http://localhost:5000/api/guests/event/${eventId}`);
-
                 setGuests(res.data);
             } catch (err) {
                 console.error("Error fetching guests:", err);
@@ -26,6 +23,18 @@ const ViewGuests = () => {
 
         fetchGuests();
     }, [eventId]);
+
+    const handleDelete = async (guestId) => {
+        if (!window.confirm("Are you sure you want to delete this guest and their invitation?")) return;
+        try {
+            await axios.delete(`http://localhost:5000/api/guests/${guestId}`);
+            setGuests(prev => prev.filter(g => g._id !== guestId));
+            alert("Guest deleted successfully.");
+        } catch (err) {
+            console.error("Delete error:", err.response?.data || err.message);
+            alert("Failed to delete guest.");
+        }
+    };
 
     if (loading) return <div className="p-6 text-center">Loading guests...</div>;
     if (error) return <div className="p-6 text-center text-red-600">{error}</div>;
@@ -43,6 +52,7 @@ const ViewGuests = () => {
                             <th className="p-2 border">Name</th>
                             <th className="p-2 border">Email</th>
                             <th className="p-2 border">RSVP</th>
+                            <th className="p-2 border">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -63,6 +73,14 @@ const ViewGuests = () => {
                                     >
                                         {guest.rsvpStatus || "pending"}
                                     </span>
+                                </td>
+                                <td className="border p-2">
+                                    <button
+                                        className="bg-blue-600 text-green-300 px-4 py-2 rounded hover:bg-blue-700"
+                                        onClick={() => handleDelete(guest._id)}
+                                    >
+                                        Delete
+                                    </button>
                                 </td>
                             </tr>
                         ))}

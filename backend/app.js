@@ -7,10 +7,13 @@ app.use(express.json());
 
 // Routes
 const eventRoutes = require('./routes/eventRoutes');
-const authRoutes = require('./routes/auth'); // optional
+const authRoutes = require('./routes/authRoutes'); // ✅ correct
+
 const charityRoutes = require('./routes/charityRoutes');
-const guestRoutes = require('./routes/guest');
-const contributionRoutes = require('./routes/contribution');
+const guestRoutes = require('./routes/guestRoutes');
+const contributionRoutes = require('./routes/contributionRoutes');
+const invitationRoutes = require('./routes/invitationRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 
 // Register routes
 app.use('/api/auth', authRoutes);
@@ -18,11 +21,10 @@ app.use('/api/events', eventRoutes);
 app.use('/api/charities', charityRoutes);
 //app.use('/api/charities/:id', charityRoutes);
 app.use('/api/guests', guestRoutes);
-app.use('/api/contributions', require('./routes/contribution'));
-app.use('/api/dashboard', require('./routes/dashboard'));
+//app.use('/api/contributions', require('./routes/contribution'));
+app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/contributions', contributionRoutes);
 
 console.log("➡️ Registering invitation route");
-app.use('/invitations', require('./routes/invitationRoute'));
-
+app.use('/invitations', invitationRoutes);
 module.exports = app;
