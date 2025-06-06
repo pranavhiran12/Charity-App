@@ -13,11 +13,14 @@ const guestSchema = new mongoose.Schema({
         enum: ["Yes", "No", "Maybe"],
         default: "Maybe"
     },
+    mobile: { type: String }, // ✅ Add this line
+
     status: {
         type: String,
-        enum: ['accepted', 'declined', 'pending'],
-        default: 'pending'
+        enum: ['Pending', 'Accepted', 'Declined'], // ✅ Add 'Pending'
+        default: 'Pending'
     }
+
 }, { timestamps: true });
 
 module.exports = mongoose.model("Guest", guestSchema);

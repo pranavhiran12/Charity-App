@@ -8,6 +8,12 @@ const Dashboard = () => {
     const [events, setEvents] = useState([]);
     const [guests, setGuests] = useState({});
     const [invites, setInvites] = useState({});
+    const [showInviteFormFor, setShowInviteFormFor] = useState(null);
+    const [inviteGuestForm, setInviteGuestForm] = useState({ name: '', email: '', mobile: '' });
+    const [inviteMessage, setInviteMessage] = useState('');
+    const [totalContributions, setTotalContributions] = useState({});
+    const [loadingTotals, setLoadingTotals] = useState({});
+
     const token = localStorage.getItem('token');
     const navigate = useNavigate();
 
@@ -85,17 +91,13 @@ const Dashboard = () => {
         }
     };
 
-
     const handleInvite = async (eventId) => {
         try {
             const res = await axios.post(`http://localhost:5000/invitations/send/${eventId}`);
-            const baseUrl = "http://localhost:517/invite"; // or your deployed URL
+            const baseUrl = "http://localhost:5173/invite";
             const links = res.data.map(invite => `${baseUrl}/${invite.invitationCode}`);
 
-            // Copy links to clipboard
             await navigator.clipboard.writeText(links.join('\n'));
-
-            // Log them for reference
             console.log("🔗 Invitation Links:");
             links.forEach(link => console.log(link));
 
@@ -106,8 +108,59 @@ const Dashboard = () => {
         }
     };
 
+    const handle2Invite = (eventId) => {
+        setShowInviteFormFor(eventId);
+        setInviteGuestForm({ name: '', email: '', mobile: '' });
+        setInviteMessage('');
+    };
 
+    const handleInviteInputChange = (e) => {
+        const { name, value } = e.target;
+        setInviteGuestForm(prev => ({ ...prev, [name]: value }));
+    };
 
+    const submitInviteGuest = async (eventId) => {
+        try {
+            const guestRes = await axios.post('http://localhost:5000/api/guests', {
+                name: inviteGuestForm.name,
+                email: inviteGuestForm.email,
+                mobile: inviteGuestForm.mobile,
+                eventId: eventId
+            });
+
+            const guestId = guestRes.data._id;
+
+            await axios.post('http://localhost:5000/invitations/autolink', {
+                guestId,
+                eventId
+            });
+
+            setInviteMessage('✅ Invitation sent successfully!');
+            setInviteGuestForm({ name: '', email: '', mobile: '' });
+            setTimeout(() => setShowInviteFormFor(null), 2000);
+        } catch (err) {
+            console.error('Error:', err?.response?.data || err.message);
+            setInviteMessage('❌ Failed to send invitation.');
+        }
+    };
+
+    const fetchTotalContributions = async (eventId) => {
+        try {
+            setLoadingTotals(prev => ({ ...prev, [eventId]: true }));
+
+            const response = await axios.get(`http://localhost:5000/api/contributions/total/${eventId}`);
+
+            setTotalContributions(prev => ({
+                ...prev,
+                [eventId]: response.data.total || 0  // ✅ Fixed key here
+            }));
+        } catch (error) {
+            console.error("Failed to fetch total contributions:", error);
+            setTotalContributions(prev => ({ ...prev, [eventId]: "Error" }));
+        } finally {
+            setLoadingTotals(prev => ({ ...prev, [eventId]: false }));
+        }
+    };
 
     if (!summary) return <div className="p-6 text-center">Loading Dashboard...</div>;
 
@@ -119,8 +172,6 @@ const Dashboard = () => {
                     Logout
                 </button>
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-10"></div>
 
             <div className="bg-white p-6 shadow rounded mb-10">
                 <div className="flex justify-between items-center mb-4">
@@ -173,7 +224,7 @@ const Dashboard = () => {
                                         <div className="flex gap-2">
                                             {invites[`${event._id}-${guest._id}`] ? (
                                                 <a
-                                                    href={`http://localhost:5174/invite/${invites[`${event._id}-${guest._id}`]}`}
+                                                    href={`http://localhost:5173/invite/${invites[`${event._id}-${guest._id}`]}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="text-blue-600 underline"
@@ -192,27 +243,96 @@ const Dashboard = () => {
                                     </div>
                                 ))}
 
-                                {/* ✅ One Contribute Button Below All Guests */}
-                                <div className="mt-4 text-right">
+                                <div className="mt-4 text-right space-x-2">
                                     <button
                                         onClick={() => navigate(`/contribute/${event._id}`)}
                                         className="bg-blue-600 text-green-300 px-4 py-2 rounded hover:bg-blue-700"
                                     >
                                         💰 Contribute to this Event
                                     </button>
+
+                                    <button
+                                        onClick={() => handleInvite(event._id)}
+                                        className="bg-blue-600 text-green-300 px-4 py-2 rounded hover:bg-blue-700"
+                                    >
+                                        Send Bulk Invitation
+                                    </button>
+
+                                    <button
+                                        onClick={() => handle2Invite(event._id)}
+                                        className="bg-blue-600 text-green-300 px-4 py-2 rounded hover:bg-blue-700"
+                                    >
+                                        Send Invitation
+                                    </button>
+
+                                    <button
+                                        onClick={() => fetchTotalContributions(event._id)}
+                                        className="bg-blue-600 text-green-300 px-4 py-2 rounded hover:bg-blue-700"
+                                    >
+                                        View Total Contribution
+                                    </button>
+
+                                    {loadingTotals[event._id] ? (
+                                        <p className="text-gray-500 mt-2">Loading total...</p>
+                                    ) : (
+                                        totalContributions[event._id] !== undefined && (
+                                            <p className="text-green-700 font-semibold mt-2">
+                                                💰 Total Contribution: ₹{totalContributions[event._id]}
+                                            </p>
+                                        )
+                                    )}
                                 </div>
 
-                                <button
-                                    onClick={() => handleInvite(event._id)}
-                                    className="bg-blue-600 text-green-300 px-4 py-2 rounded hover:bg-blue-700"
-                                >
-                                    Send Invitation
-                                </button>
+                                {showInviteFormFor === event._id && (
+                                    <div className="mt-3 bg-gray-100 p-4 rounded shadow-sm space-y-2">
+                                        <input
+                                            type="text"
+                                            name="name"
+                                            placeholder="Guest Name"
+                                            value={inviteGuestForm.name}
+                                            onChange={handleInviteInputChange}
+                                            className="w-full p-2 border rounded"
+                                        />
+                                        <input
+                                            type="email"
+                                            name="email"
+                                            placeholder="Guest Email"
+                                            value={inviteGuestForm.email}
+                                            onChange={handleInviteInputChange}
+                                            className="w-full p-2 border rounded"
+                                        />
+                                        <input
+                                            type="text"
+                                            name="mobile"
+                                            placeholder="Mobile Number"
+                                            value={inviteGuestForm.mobile}
+                                            onChange={handleInviteInputChange}
+                                            className="w-full p-2 border rounded"
+                                        />
 
+                                        <div className="flex gap-2 justify-end">
+                                            <button
+                                                onClick={() => submitInviteGuest(event._id)}
+                                                className="bg-blue-600 text-green-300 px-4 py-2 rounded hover:bg-blue-700"
+                                            >
+                                                Send
+                                            </button>
+                                            <button
+                                                onClick={() => setShowInviteFormFor(null)}
+                                                className="bg-blue-600 text-green-300 px-4 py-2 rounded hover:bg-blue-700"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
 
-
+                                        {inviteMessage && (
+                                            <div className="text-sm mt-2 text-green-700 font-semibold">
+                                                {inviteMessage}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
-
                         </li>
                     ))}
                 </ul>

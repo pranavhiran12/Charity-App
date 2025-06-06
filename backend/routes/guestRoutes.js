@@ -1,37 +1,34 @@
-const router = require('express').Router();
-const {
-    rsvpGuest,
-    addGuestToEvent,
-    getGuestByEmail,
-    findGuest,
-    getGuestsByEvent,
-    getAllGuests,
-    deleteGuest,
-    updateGuest
-} = require('../controllers/guestController');
+const express = require('express');
+const router = express.Router();
 
-// RSVP
-router.post('/:eventId/rsvp', rsvpGuest);
+console.log("👋 Guest routes loaded");
 
-// Add guest to event
-router.post('/event/:eventId', addGuestToEvent);
 
-// Get guest by email
-router.get('/by-email', getGuestByEmail);
+/*router.post('/debug', (req, res) => {
+    console.log('✅ /api/guests/debug hit');
+    res.send('Debug route works');
+});
 
-// Find guest (lightweight)
-router.get('/find', findGuest);
 
-// Get all guests for an event
-router.get('/event/:eventId', getGuestsByEvent);
+router.use((req, res, next) => {
+    console.log("🚨 Incoming request on /api/guests route");
+    next();
+});
 
-// Get all guests
-router.get('/', getAllGuests);
+// Import handlers inline to avoid circular reference
+router.post('/test', (req, res) => {
+    console.log("✅ TEST route hit");
+    res.send('Guest test route working');
+});*/
 
-// Update guest
-router.put('/:id', updateGuest);
-
-// Delete guest
-router.delete('/:guestId', deleteGuest);
+router.post('/:eventId/rsvp', require('../controllers/guestController').rsvpGuest);
+router.post('/event/:eventId', require('../controllers/guestController').addGuestToEvent);
+router.get('/by-email', require('../controllers/guestController').getGuestByEmail);
+router.get('/find', require('../controllers/guestController').findGuest);
+router.get('/event/:eventId', require('../controllers/guestController').getGuestsByEvent);
+router.get('/', require('../controllers/guestController').getAllGuests);
+router.put('/:id', require('../controllers/guestController').updateGuest);
+router.delete('/:guestId', require('../controllers/guestController').deleteGuest);
+router.post('/', require('../controllers/guestController').createGuest); // 🔥 this was breaking
 
 module.exports = router;

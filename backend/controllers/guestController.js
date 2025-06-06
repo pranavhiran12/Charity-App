@@ -2,6 +2,11 @@ const Guest = require('../models/Guest');
 const Event = require('../models/Event');
 const mongoose = require('mongoose');
 const Invitation = require('../models/Invitation');
+//const { createGuest } = require('../controllers/guestController');
+
+
+
+console.log("👋 Guest routes loaded");
 
 // RSVP a guest for an event
 exports.rsvpGuest = async(req, res) => {
@@ -119,5 +124,23 @@ exports.updateGuest = async(req, res) => {
         res.json(guest);
     } catch (err) {
         res.status(400).json({ error: err.message });
+    }
+};
+
+exports.createGuest = async(req, res) => {
+    const { name, email, mobile, eventId } = req.body;
+
+    console.log("🎯 /api/guests POST hit");
+    console.log("Body:", req.body);
+
+    console.log("Incoming guest data:", req.body); // 🐞 Debug log
+
+    try {
+        const guest = new Guest({ name, email, mobile, eventId, status: 'Pending' });
+        await guest.save();
+        res.status(201).json(guest);
+    } catch (err) {
+        console.error("Guest creation error:", err.message); // 🐞 Debug log
+        res.status(400).json({ message: 'Guest creation failed', error: err.message });
     }
 };

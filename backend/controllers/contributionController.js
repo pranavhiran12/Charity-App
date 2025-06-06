@@ -79,19 +79,33 @@ exports.getContributionById = async(req, res) => {
 // Get total contributions for an event
 exports.getTotalContributionForEvent = async(req, res) => {
     try {
-        const eventObjectId = new mongoose.Types.ObjectId(req.params.eventId);
+        const { eventId } = req.params;
+
+        // Ensure the eventId is valid
+        if (!mongoose.Types.ObjectId.isValid(eventId)) {
+            return res.status(400).json({ message: 'Invalid eventId' });
+        }
+
+        const objectId = mongoose.Types.ObjectId.createFromHexString(eventId);
+
         const total = await Contribution.aggregate([
-            { $match: { eventId: eventObjectId } },
-            { $group: { _id: null, totalAmount: { $sum: '$amount' } } }
+            { $match: { eventId: objectId } },
+            {
+                $group: {
+                    _id: null,
+                    total: { $sum: '$amount' }
+                }
+            }
         ]);
-        const totalAmount = total.length > 0 ? total[0].totalAmount : 0;
-        res.json({ totalAmount });
+
+        const totalAmount = total.length > 0 ? total[0].total : 0;
+
+        res.json({ total: totalAmount });
     } catch (err) {
-        console.error('Error calculating total contributions:', err);
+        console.error('Error calculating total contributions:', err.message);
         res.status(500).json({ message: 'Server error' });
     }
 };
-
 // Delete a contribution
 exports.deleteContribution = async(req, res) => {
     try {
