@@ -1,7 +1,7 @@
 // TOP: keep your existing imports
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate, Link } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 
 const Dashboard = () => {
     const [summary, setSummary] = useState(null);
@@ -34,6 +34,18 @@ const Dashboard = () => {
     };
 
     useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        const tokenFromURL = queryParams.get('token');
+
+        if (tokenFromURL) {
+            localStorage.setItem('token', tokenFromURL);
+            window.location.href = '/dashboard';
+            return;
+        }
+
+
+
+
         if (!token) {
             navigate('/login');
             return;
@@ -71,7 +83,7 @@ const Dashboard = () => {
 
         fetchSummary();
         fetchEvents();
-    }, [token, navigate]);
+    }, [location, navigate, token]);
 
     const handleGenerateInvitation = async (eventId, guestId) => {
         try {
@@ -219,6 +231,7 @@ const Dashboard = () => {
                                                 Status: <span className={`px-2 py-0.5 rounded-full font-semibold w-fit ${guest.status?.toLowerCase() === 'accepted' ? 'bg-green-100 text-green-700' : guest.status?.toLowerCase() === 'declined' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
                                                     {guest.status ? guest.status.charAt(0).toUpperCase() + guest.status.slice(1).toLowerCase() : 'Pending'}
                                                 </span>
+
                                             </span>
                                         </div>
                                         <div className="flex gap-2">
