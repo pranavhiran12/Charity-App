@@ -10,7 +10,9 @@ export default {
                 outfit: ['Outfit', 'sans-serif'],
                 inter: ['Inter', 'sans-serif'],
                 playfair: ['Playfair Display', 'serif'],
+                sans: ['Nunito', 'sans-serif'],
             },
+
         },
     },
     plugins: [],

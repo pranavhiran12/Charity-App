@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-
+const guestController = require("../controllers/guestController");
 console.log("👋 Guest routes loaded");
 
 
@@ -30,5 +30,8 @@ router.get('/', require('../controllers/guestController').getAllGuests);
 router.put('/:id', require('../controllers/guestController').updateGuest);
 router.delete('/:guestId', require('../controllers/guestController').deleteGuest);
 router.post('/', require('../controllers/guestController').createGuest); // 🔥 this was breaking
+router.get("/:eventId/rsvp-count", guestController.getRSVPStatusCount);
+
+
 
 module.exports = router;

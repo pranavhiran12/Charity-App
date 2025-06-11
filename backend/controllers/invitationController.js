@@ -5,6 +5,8 @@ const Event = require('../models/Event');
 const { v4: uuidv4 } = require('uuid');
 const mongoose = require('mongoose');
 const crypto = require('crypto');
+
+
 exports.sendInvitation = async(req, res) => {
     const { eventId } = req.params;
 
@@ -32,7 +34,7 @@ exports.sendInvitation = async(req, res) => {
                     guestId: guest._id,
                     name: guest.name,
                     invitationCode: code,
-                    invitationLink: `http://localhost:5174/invite/${code}`,
+                    invitationLink: `http://localhost:5173/invite/${code}`,
                 };
             })
         );

@@ -2,14 +2,10 @@ const express = require('express');
 const app = express();
 const session = require("express-session");
 const passport = require("passport");
-
 const cors = require('cors');
-
 
 require("dotenv").config();
 require("./config/passport"); // Load passport strategies
-
-
 
 // ✅ Middleware
 app.use(cors({
@@ -35,6 +31,7 @@ const eventRoutes = require('./routes/eventRoutes');
 const authRoutes = require('./routes/authRoutes');
 const charityRoutes = require('./routes/charityRoutes');
 const guestRoutes = require('./routes/guestRoutes');
+const guestRoutes2 = require('./routes/guestRoutes2');
 const contributionRoutes = require('./routes/contributionRoutes');
 const invitationRoutes = require('./routes/invitationRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
@@ -48,7 +45,8 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/charities', charityRoutes);
-app.use('/api/guests', guestRoutes);
+app.use('/api/guests', guestRoutes); // guestRoutes will emit WebSocket events
+app.use('/api/guests', guestRoutes2); // legacy or extra routes
 app.use('/api/contributions', contributionRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/invitations', invitationRoutes);

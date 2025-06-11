@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
+import RSVPStatusCounter from "../pages/Invitations/RSVPStatusCounter";
+
 
 const Dashboard = () => {
     const [summary, setSummary] = useState(null);
@@ -294,6 +296,14 @@ const Dashboard = () => {
                                             </p>
                                         )
                                     )}
+
+                                    {/* ✅ RSVP Status Summary */}
+                                    <div className="mt-4">
+                                        <RSVPStatusCounter eventId={event._id} />
+                                    </div>
+
+
+
                                 </div>
 
                                 {showInviteFormFor === event._id && (

@@ -1,23 +1,38 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+//const sendEmail = require("../utils/sendEmail");
+
+const { sendEmail, sendVerificationEmail } = require('../utils/sendEmail'); // adjust path
 
 exports.registerUser = async(req, res) => {
     try {
-        const { email, password } = req.body;
+        const { name, email, password } = req.body;
 
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ error: 'Email already in use' });
-        }
+        const existing = await User.findOne({ email });
+        if (existing) return res.status(400).json({ message: "Email already exists" });
 
-        const hashed = await bcrypt.hash(password, 10);
-        const user = new User({ email, password: hashed });
-        await user.save();
+        const verificationToken = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
-        res.sendStatus(201);
+        const newUser = new User({
+            name,
+            email,
+            password,
+            verificationToken,
+            isVerified: false,
+        });
+
+        await newUser.save();
+
+        const verificationLink = `http://localhost:5000/api/auth/verify/${verificationToken}`;
+
+        const message = `Hi ${name},\n\nPlease verify your email by clicking the link below:\n${verificationLink}\n\nThank you!`;
+
+        await sendEmail(email, "Verify your TwoPresents account", message);
+
+        res.status(201).json({ message: "Registration successful. Please check your email to verify your account." });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ message: "Registration failed", error: err.message });
     }
 };
 

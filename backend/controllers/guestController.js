@@ -144,3 +144,48 @@ exports.createGuest = async(req, res) => {
         res.status(400).json({ message: 'Guest creation failed', error: err.message });
     }
 };
+exports.getRSVPStatusCount = async(req, res) => {
+    const { eventId } = req.params;
+
+    try {
+        const counts = await Guest.aggregate([{
+                $match: {
+                    eventId: new mongoose.Types.ObjectId(eventId)
+                }
+            },
+            {
+                $project: {
+                    normalizedStatus: {
+                        $switch: {
+                            branches: [
+                                { case: { $eq: ["$status", "Accepted"] }, then: "Accepted" },
+                                { case: { $eq: ["$status", "accepted"] }, then: "Accepted" },
+                                { case: { $eq: ["$status", "Declined"] }, then: "Declined" },
+                                { case: { $eq: ["$status", "declined"] }, then: "Declined" },
+                                { case: { $eq: ["$status", "Pending"] }, then: "Pending" },
+                                { case: { $eq: ["$status", "pending"] }, then: "Pending" }
+                            ],
+                            default: "Pending"
+                        }
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: "$normalizedStatus",
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+
+        const result = { Accepted: 0, Declined: 0, Pending: 0 };
+        counts.forEach(item => {
+            result[item._id] = item.count;
+        });
+
+        res.json(result);
+    } catch (err) {
+        console.error("Error fetching RSVP status count:", err);
+        res.status(500).json({ error: "Server error" });
+    }
+};

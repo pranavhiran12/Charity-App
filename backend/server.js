@@ -1,48 +1,59 @@
+const http = require('http');
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+const { Server } = require('socket.io');
 const app = require('./app');
-const mongoose = require('mongoose');
-require('dotenv').config();
 
+// Load environment variables
+dotenv.config();
 
-console.log("🟢 server.js is running...");
+// Create HTTP server from Express app
+const server = http.createServer(app);
 
-mongoose.connect(process.env.MONGO_URI, {})
-    .then(() => {
-        console.log('✅ MongoDB connected');
-        app.listen(5000, () => {
-            console.log('🚀 Server running on http://localhost:5000');
-        });
-    })
-    .catch(err => console.error('MongoDB connection error:', err));
+// Initialize Socket.IO
+const io = new Server(server, {
+    cors: {
+        origin: "http://localhost:5173",
+        methods: ["GET", "POST", "DELETE"],
+        credentials: true
+    }
+});
 
-/*
-const app = require('./app');
-const mongoose = require('mongoose');
-require('dotenv').config();
+// Attach io to app
+app.set('io', io);
 
-mongoose.connect(process.env.MONGO_URI, {})
-    .then(() => {
-        console.log('✅ MongoDB connected');
-        app.listen(5000, () => {
-            console.log('🚀 Server running at http://localhost:5000');
-        });
-    })
-    .catch(err => console.error('❌ MongoDB connection error:', err));*/
+// Handle socket connections
+io.on('connection', (socket) => {
+    console.log('✅ Socket connected:', socket.id);
 
-
-// backend/server.js
-/*const app = require('./app');
-const mongoose = require('mongoose');
-
-const PORT = process.env.PORT || 5000;
-
-mongoose.connect('mongodb://127.0.0.1:27017/twopresents', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-}).then(() => {
-    console.log('✅ MongoDB connected');
-    app.listen(PORT, () => {
-        console.log(`🚀 Server running on http://localhost:${PORT}`);
+    socket.on('joinEventRoom', (eventId) => {
+        socket.join(eventId);
+        console.log(`📢 Joined event room: ${eventId}`);
     });
-}).catch((err) => {
-    console.error('❌ MongoDB connection error:', err.message);
-});*/
+
+    socket.on('leaveEventRoom', (eventId) => {
+        socket.leave(eventId);
+        console.log(`🚪 Left event room: ${eventId}`);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('❌ Socket disconnected:', socket.id);
+    });
+});
+
+// Connect to MongoDB before starting the server
+mongoose.connect(process.env.MONGO_URI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    })
+    .then(() => {
+        console.log('✅ MongoDB connected');
+        const PORT = process.env.PORT || 5000;
+        server.listen(PORT, () => {
+            console.log(`🚀 Server running at http://localhost:${PORT}`);
+        });
+    })
+    .catch(err => {
+        console.error('❌ MongoDB connection error:', err.message);
+        process.exit(1); // Exit process if DB connection fails
+    });

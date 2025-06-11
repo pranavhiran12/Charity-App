@@ -19,6 +19,14 @@ const eventSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
+    time: {
+        type: String,
+        required: true // e.g., "5:00 PM" or "17:00"
+    },
+    venue: {
+        type: String,
+        required: true // e.g., "Community Hall, Mumbai"
+    },
     eventImage: String,
 
     giftName: {
