@@ -18,7 +18,8 @@ const authMiddleware = async(req, res, next) => {
         if (!user) return res.status(401).json({ message: 'User not found' });
 
         // ✅ Make sure `req.user._id` is always set
-        req.user = { _id: user._id }; // or req.user = user if you need more fields
+        // req.user = { _id: user._id }; // or req.user = user if you need more fields
+        req.user = { _id: user._id, id: user._id }; // ✅ now both id and _id will work
 
         next();
     } catch (err) {

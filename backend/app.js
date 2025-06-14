@@ -30,11 +30,14 @@ app.use(passport.session());
 const eventRoutes = require('./routes/eventRoutes');
 const authRoutes = require('./routes/authRoutes');
 const charityRoutes = require('./routes/charityRoutes');
-const guestRoutes = require('./routes/guestRoutes');
+//const guestRoutes = require('./routes/guestRoutes');
 const guestRoutes2 = require('./routes/guestRoutes2');
 const contributionRoutes = require('./routes/contributionRoutes');
 const invitationRoutes = require('./routes/invitationRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const profileRoutes = require('./routes/profileRoutes'); // 👈 You’ll create this
+
+const contactRoutes = require('./routes/contactRoutes');
 
 // ✅ Health check
 app.get('/', (req, res) => {
@@ -45,11 +48,13 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/charities', charityRoutes);
-app.use('/api/guests', guestRoutes); // guestRoutes will emit WebSocket events
+//app.use('/api/guests', guestRoutes); // guestRoutes will emit WebSocket events
 app.use('/api/guests', guestRoutes2); // legacy or extra routes
 app.use('/api/contributions', contributionRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/invitations', invitationRoutes);
+app.use('/api/profile', profileRoutes); // 👈 User profile save/fetch route
+app.use('/api/contacts', contactRoutes);
 
 // Debug/test route
 app.post('/api/guests-debug', (req, res) => {
