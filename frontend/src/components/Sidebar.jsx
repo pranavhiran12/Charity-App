@@ -30,7 +30,7 @@ const Sidebar = () => {
     { text: 'Events', icon: <Event />, path: '/dashboard2/UIevent1' },
     { text: 'Invites', icon: <Mail />, path: '/dashboard/invites' },
     { text: 'Contacts', icon: <People />, path: '/dashboard2/contacts' },
-    { text: 'Profile', icon: <AccountCircle />, path: '/dashboard/profile' },
+    { text: 'Profile', icon: <AccountCircle />, path: '/dashboard2/profile' },
   ];
 
   const handleLogout = () => {

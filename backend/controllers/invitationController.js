@@ -267,6 +267,8 @@ const Event = require('../models/Event');
 const { v4: uuidv4 } = require('uuid');
 const mongoose = require('mongoose');
 const crypto = require('crypto');
+
+
 exports.sendInvitation = async(req, res) => {
     const { eventId } = req.params;
 
@@ -294,7 +296,7 @@ exports.sendInvitation = async(req, res) => {
                     guestId: guest._id,
                     name: guest.name,
                     invitationCode: code,
-                    invitationLink: `http://localhost:5174/invite/${code}`,
+                    invitationLink: `http://localhost:5173/invite/${code}`,
                 };
             })
         );
@@ -305,6 +307,41 @@ exports.sendInvitation = async(req, res) => {
         res.status(500).json({ error: "Server error while sending invitations." });
     }
 };
+
+
+/*exports.sendBulkInvitations = async(req, res) => {
+    const { guestIds } = req.body;
+    const { eventId } = req.params;
+
+    if (!guestIds || !Array.isArray(guestIds) || guestIds.length === 0) {
+        return res.status(400).json({ message: "No valid guest IDs provided." });
+    }
+
+    try {
+        const invitations = await Promise.all(
+            guestIds.map(async guestId => {
+                // Optional: verify guest belongs to event
+                const guest = await GuestModel.findOne({ _id: guestId, eventId });
+                if (!guest) return null;
+
+                // Create or retrieve invitation
+                const invite = await InvitationModel.findOneAndUpdate({ guestId, eventId }, {}, { upsert: true, new: true, setDefaultsOnInsert: true });
+
+                return { invitationCode: invite.invitationCode };
+            })
+        );
+
+        // Filter out any `null` where guest didn't match event
+        const filtered = invitations.filter(Boolean);
+
+        res.json(filtered);
+    } catch (err) {
+        console.error("Bulk invitation error:", err);
+        res.status(500).json({ message: "Failed to send invitations." });
+    }
+};*/
+
+
 
 exports.respondToInvitation = async(req, res) => {
     try {

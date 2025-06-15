@@ -34,6 +34,9 @@ import RSVPPage from './pages/Guest/RSVPPage';
 import GuestContributions from './pages/Guest/GuestContributions'; // ✅ ADD THIS
 import UIGuestAddressBook from './pages/Guest/UIGuestAddressBook';
 import UIContactsPage from './pages/Guest/UIContactsPage';
+import UIUniversalContactsPage from './pages/Guest/UIUniversalContactsPage';
+
+
 
 // Contributions
 import Contribute from './pages/Contributions/Contribute';
@@ -45,6 +48,7 @@ import ViewContributions from './pages/Contributions/ViewContributions'; // (Not
 // Charity
 import AddCharityPage from './pages/Charity/AddCharityPage';
 import SelectCharityPage from './pages/Charity/SelectCharityPage';
+import UIUserProfilePage from './pages/UIUserProfilePage';
 
 // Invitations
 import Invite from './pages/Invitations/Invite';
@@ -98,8 +102,9 @@ function App() {
           <Route path="/dashboard2" element={<Dashboard2 />}>
             <Route path="UIEvent1" element={<UIEvent1 />} />
             <Route path="create-template-event" element={<UIEventTemplateForm />} />
-            <Route path="contacts" element={<UISelectEventPage />} />
+            <Route path="contacts" element={<UIUniversalContactsPage />} />
             <Route path="contacts/:eventId" element={<UIContactsPage />} />
+            <Route path="profile" element={<UIUserProfilePage />} />
 
           </Route>
 
