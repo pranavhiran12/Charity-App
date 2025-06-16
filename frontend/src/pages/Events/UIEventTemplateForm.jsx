@@ -3,6 +3,7 @@ import {
     Box, Button, TextField, MenuItem, Typography, Grid, InputAdornment
 } from '@mui/material';
 import axios from 'axios';
+import CharitySelector from '../Charity/CharitySelector'; // Import CharitySelector component
 
 const templates = {
     blank: {
@@ -85,6 +86,17 @@ const EventTemplateForm = () => {
         }
     };
 
+    const handleCharitySelect = (charity) => {
+        setForm({
+            ...form,
+            charity: {
+                name: charity.name,
+                description: charity.description,
+                charityId: charity._id
+            }
+        });
+    };
+
     const handleSubmit = async () => {
         const token = localStorage.getItem('token');
 
@@ -146,15 +158,39 @@ const EventTemplateForm = () => {
                 <Grid item xs={12}>
                     <TextField label="Gift Name" name="giftName" value={form.giftName} onChange={handleChange} fullWidth />
                 </Grid>
-                <Grid item xs={6}>
-                    <TextField label="Charity Name" name="charity.name" value={form.charity.name} onChange={handleChange} fullWidth />
+                <Grid item xs={12}>
+                    <CharitySelector onSelect={handleCharitySelect} />
                 </Grid>
                 <Grid item xs={6}>
-                    <TextField label="Charity ID" name="charity.charityId" value={form.charity.charityId} onChange={handleChange} fullWidth />
+                    <TextField
+                        label="Charity Name"
+                        name="charity.name"
+                        value={form.charity.name}
+                        fullWidth
+                        InputProps={{ readOnly: true }}
+                    />
+                </Grid>
+                <Grid item xs={6}>
+                    <TextField
+                        label="Charity ID"
+                        name="charity.charityId"
+                        value={form.charity.charityId}
+                        fullWidth
+                        InputProps={{ readOnly: true }}
+                    />
                 </Grid>
                 <Grid item xs={12}>
-                    <TextField label="Charity Description" name="charity.description" value={form.charity.description} onChange={handleChange} fullWidth />
+                    <TextField
+                        label="Charity Description"
+                        name="charity.description"
+                        value={form.charity.description}
+                        fullWidth
+                        InputProps={{ readOnly: true }}
+                        multiline
+                        minRows={2}
+                    />
                 </Grid>
+
                 <Grid item xs={6}>
                     <TextField
                         label="Target Amount"

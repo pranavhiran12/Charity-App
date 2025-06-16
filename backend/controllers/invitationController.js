@@ -352,9 +352,16 @@ exports.respondToInvitation = async(req, res) => {
 
         if (!invitation) return res.status(404).json({ message: 'Invitation not found' });
 
-        const updatedGuest = await Guest.findByIdAndUpdate(
-            invitation.guestId._id, { status }, { new: true }
-        );
+        await Guest.findByIdAndUpdate(invitation.guestId._id, { status });
+
+        // 🔥 Emit socket event here (you need to have socket instance)
+        const io = req.app.get('io'); // You must set `io` globally (shown below)
+        io.to(invitation.eventId._id.toString()).emit('inviteeStatusUpdated', {
+            guestId: invitation.guestId._id,
+            name: invitation.guestId.name,
+            mobile: invitation.guestId.mobile,
+            status,
+        });
 
         res.json({ message: `Invitation ${status}`, invitation });
     } catch (err) {

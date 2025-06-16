@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {
-    Box, Typography, Paper, Divider, Chip, TextField, Button, Table, TableBody,
+    Box, Typography, Paper, Divider, Chip, TextField, Grid, Button, Table, TableBody,
     TableCell, TableContainer, TableHead, TableRow, IconButton, Stack, Dialog,
     DialogTitle, DialogContent, DialogContentText, DialogActions, Snackbar, Alert, InputAdornment
 } from '@mui/material';
@@ -14,6 +14,7 @@ import { io } from 'socket.io-client';
 
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import EmailIcon from '@mui/icons-material/Email';
+
 
 const UIEventDetails = () => {
     const { id: eventId } = useParams();
@@ -266,39 +267,86 @@ const UIEventDetails = () => {
         }
     };
 
-    if (!event) return <Typography>Loading...</Typography>;
+    if (!event || !event.eventTitle) {
+        return <Typography variant="h6">Loading event data...</Typography>;
+    }
 
     return (
         <Box sx={{ p: { xs: 2, sm: 4, md: 6 }, maxWidth: 1000, mx: 'auto' }}>
-            <Paper elevation={4} sx={{ p: 4, mb: 4 }}>
-                <Typography variant="h4" gutterBottom>{event.eventTitle}</Typography>
-                <Divider sx={{ mb: 2 }} />
-                <Typography><strong>Child Name:</strong> {event.childName}</Typography>
-                <Typography><strong>Description:</strong> {event.eventDescription}</Typography>
-                <Typography><strong>Date:</strong> {new Date(event.eventDate).toLocaleDateString()}</Typography>
-                <Typography><strong>Time:</strong> {event.time}</Typography>
-                <Typography><strong>Venue:</strong> {event.venue}</Typography>
-                <Typography><strong>Gift:</strong> {event.giftName}</Typography>
-                <Typography><strong>Target Amount:</strong> ₹{event.totalTargetAmount}</Typography>
-                <Typography><strong>Split:</strong> 🎁 {event.splitPercentage?.gift || 0}% &nbsp;| ❤️ {event.splitPercentage?.charity || 0}%</Typography>
-                <Box sx={{ mt: 2 }}>
-                    <Chip label={event.status.toUpperCase()} color="primary" />
-                </Box>
-                {event.charity?.name && (
-                    <>
-                        <Divider sx={{ my: 2 }} />
-                        <Typography variant="h6">Charity Information</Typography>
-                        <Typography><strong>Name:</strong> {event.charity.name}</Typography>
-                        <Typography sx={{ whiteSpace: 'pre-line' }}><strong>Description:</strong> {event.charity.description}</Typography>
-                    </>
-                )}
+            <Paper elevation={6} sx={{ p: { xs: 3, sm: 4 }, mb: 5, borderRadius: 4, backgroundColor: '#fefefe' }}>
+                <Stack spacing={3}>
+                    <Box>
+                        <Typography variant="h4" fontWeight={700} gutterBottom color="primary">
+                            🎉 {event.eventTitle}
+                        </Typography>
+                        <Divider />
+                    </Box>
+
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} sm={6}>
+                            <Typography variant="subtitle2" color="text.secondary">👶 Child Name</Typography>
+                            <Typography variant="body1">{event.childName}</Typography>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <Typography variant="subtitle2" color="text.secondary">📅 Date</Typography>
+                            <Typography variant="body1">{new Date(event.eventDate).toLocaleDateString()}</Typography>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <Typography variant="subtitle2" color="text.secondary">⏰ Time</Typography>
+                            <Typography variant="body1">{event.time}</Typography>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <Typography variant="subtitle2" color="text.secondary">📍 Venue</Typography>
+                            <Typography variant="body1">{event.venue}</Typography>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Typography variant="subtitle2" color="text.secondary">📝 Description</Typography>
+                            <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
+                                {event.eventDescription}
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <Typography variant="subtitle2" color="text.secondary">🎁 Gift</Typography>
+                            <Typography variant="body1">{event.giftName}</Typography>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <Typography variant="subtitle2" color="text.secondary">💰 Target Amount</Typography>
+                            <Typography variant="body1">₹{event.totalTargetAmount}</Typography>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <Typography variant="subtitle2" color="text.secondary">🔀 Split</Typography>
+                            <Typography variant="body1">
+                                🎁 {event.splitPercentage?.gift || 0}% &nbsp;| ❤️ {event.splitPercentage?.charity || 0}%
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <Typography variant="subtitle2" color="text.secondary">📌 Status</Typography>
+                            <Chip label={event.status?.toUpperCase()} color="primary" variant="filled" />
+                        </Grid>
+                    </Grid>
+
+                    {event.charity?.name && (
+                        <>
+                            <Divider sx={{ my: 2 }} />
+                            <Box>
+                                <Typography variant="h6" color="secondary" gutterBottom>💖 Charity Information</Typography>
+                                <Typography variant="subtitle2" color="text.secondary">Name</Typography>
+                                <Typography variant="body1">{event.charity.name}</Typography>
+                                <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 1 }}>Description</Typography>
+                                <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>{event.charity.description}</Typography>
+                            </Box>
+                        </>
+                    )}
+                </Stack>
             </Paper>
 
+
             {/* --- Contacts & Invitations Section --- */}
-            <Paper elevation={6} sx={{ p: 4 }}>
+            <Paper elevation={6} sx={{ p: 4, borderRadius: 4 }}>
                 <Typography variant="h5" gutterBottom>📇 Manage Invitations</Typography>
 
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mb={3}>
+                {/* --- Action Buttons --- */}
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mb={4}>
                     <Button variant="contained" color="success" onClick={handleInvite} fullWidth>
                         📤 Send Bulk Invitations
                     </Button>
@@ -313,9 +361,10 @@ const UIEventDetails = () => {
                     </Button>
                 </Stack>
 
+                {/* --- One-Invite Form --- */}
                 {showInviteForm && (
-                    <Box sx={{ mb: 3, p: 3, backgroundColor: '#f0f4ff', borderRadius: 3 }}>
-                        <Typography variant="h6">Send One Invitation</Typography>
+                    <Box sx={{ mb: 4, p: 3, backgroundColor: '#f9f9f9', borderRadius: 3, border: '1px solid #ccc' }}>
+                        <Typography variant="h6" gutterBottom>Send One Invitation</Typography>
                         <Stack spacing={2}>
                             <TextField name="name" label="Name" value={inviteGuestForm.name} onChange={handleInviteInputChange} fullWidth />
                             <TextField name="email" label="Email" value={inviteGuestForm.email} onChange={handleInviteInputChange} fullWidth />
@@ -328,42 +377,57 @@ const UIEventDetails = () => {
                     </Box>
                 )}
 
-
-
-                <TableContainer component={Paper} sx={{ mb: 4 }}>
+                {/* --- Guest List Table --- */}
+                <Typography variant="h6" sx={{ mb: 2 }}>🎟️ Guest List</Typography>
+                <TableContainer component={Paper} sx={{ mb: 4, borderRadius: 3 }}>
                     <Table>
                         <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
                             <TableRow>
                                 <TableCell><strong>Name</strong></TableCell>
                                 <TableCell><strong>Email</strong></TableCell>
                                 <TableCell><strong>Mobile</strong></TableCell>
+                                <TableCell><strong>Status</strong></TableCell>
                                 <TableCell align="center"><strong>Actions</strong></TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {contacts.map(contact => (
-                                <TableRow key={contact._id}>
+                                <TableRow key={contact._id} hover>
                                     <TableCell>{contact.name}</TableCell>
                                     <TableCell>{contact.email}</TableCell>
                                     <TableCell>{contact.mobile}</TableCell>
+                                    <TableCell>
+                                        <Chip
+                                            label={contact.status || "Pending"}
+                                            color={
+                                                contact.status === 'Accepted'
+                                                    ? 'success'
+                                                    : contact.status === 'Declined'
+                                                        ? 'error'
+                                                        : 'warning'
+                                            }
+                                            variant="outlined"
+                                            size="small"
+                                        />
+                                    </TableCell>
                                     <TableCell align="center">
-                                        <IconButton color="success" onClick={() => sendWhatsAppMessage(contact)}>
-                                            <WhatsAppIcon />
-
-                                        </IconButton>
-                                        <IconButton color="primary" onClick={() => sendEmailInvite(contact)}>
-                                            <EmailIcon />
-                                        </IconButton>
-
-                                        <IconButton color="error" onClick={() => confirmDelete(contact._id)}>
-                                            <DeleteIcon />
-                                        </IconButton>
+                                        <Stack direction="row" spacing={1} justifyContent="center">
+                                            <IconButton color="success" onClick={() => sendWhatsAppMessage(contact)}>
+                                                <WhatsAppIcon />
+                                            </IconButton>
+                                            <IconButton color="primary" onClick={() => sendEmailInvite(contact)}>
+                                                <EmailIcon />
+                                            </IconButton>
+                                            <IconButton color="error" onClick={() => confirmDelete(contact._id)}>
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        </Stack>
                                     </TableCell>
                                 </TableRow>
                             ))}
                             {contacts.length === 0 && (
                                 <TableRow>
-                                    <TableCell colSpan={4} align="center">
+                                    <TableCell colSpan={5} align="center">
                                         No contacts found.
                                     </TableCell>
                                 </TableRow>
@@ -372,17 +436,25 @@ const UIEventDetails = () => {
                     </Table>
                 </TableContainer>
 
-
-                <Typography variant="h6" gutterBottom>➕ Add Contact</Typography>
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mb={2}>
+                {/* --- Add New Contact Manually --- */}
+                <Divider sx={{ my: 3 }} />
+                <Typography variant="h6" gutterBottom>➕ Add New Contact</Typography>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
                     <TextField name="name" value={form.name} onChange={handleChange} label="Name" fullWidth />
                     <TextField name="email" value={form.email} onChange={handleChange} label="Email" fullWidth />
                     <TextField name="mobile" value={form.mobile} onChange={handleChange} label="Mobile" fullWidth />
                 </Stack>
-                <Button variant="contained" startIcon={<SaveIcon />} onClick={handleAdd} disabled={loading}>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<SaveIcon />}
+                    onClick={handleAdd}
+                    disabled={loading}
+                >
                     Save Contact
                 </Button>
             </Paper>
+
 
             {/* Dialogs & Snackbar */}
             <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>

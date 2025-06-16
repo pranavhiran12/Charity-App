@@ -28,7 +28,7 @@ const Sidebar = () => {
 
   const menuItems = [
     { text: 'Events', icon: <Event />, path: '/dashboard2/UIevent1' },
-    { text: 'Invites', icon: <Mail />, path: '/dashboard/invites' },
+    { text: 'Invites', icon: <Mail />, path: '/dashboard2/invitees' },
     { text: 'Contacts', icon: <People />, path: '/dashboard2/contacts' },
     { text: 'Profile', icon: <AccountCircle />, path: '/dashboard2/profile' },
   ];

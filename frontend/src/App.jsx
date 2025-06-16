@@ -53,7 +53,12 @@ import UIUserProfilePage from './pages/UIUserProfilePage';
 // Invitations
 import Invite from './pages/Invitations/Invite';
 
+import InviteeList from './components/InviteeList';
+
 import GenerateInvite from './pages/Invitations/GenerateInvite';
+
+
+
 
 function GuestContributionsWrapper() {
   const { guestId } = useParams();
@@ -105,6 +110,8 @@ function App() {
             <Route path="contacts" element={<UIUniversalContactsPage />} />
             <Route path="contacts/:eventId" element={<UIContactsPage />} />
             <Route path="profile" element={<UIUserProfilePage />} />
+
+            <Route path="invitees/:eventId" element={<InviteeList />} />
 
           </Route>
 
