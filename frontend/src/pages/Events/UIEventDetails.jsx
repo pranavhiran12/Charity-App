@@ -1,20 +1,28 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Box, Typography, Paper, Divider, Chip, TextField, Grid, Button, Table, TableBody,
     TableCell, TableContainer, TableHead, TableRow, IconButton, Stack, Dialog,
     DialogTitle, DialogContent, DialogContentText, DialogActions, Snackbar, Alert, InputAdornment
 } from '@mui/material';
+
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
 import SearchIcon from '@mui/icons-material/Search';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { io } from 'socket.io-client';
-
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import EmailIcon from '@mui/icons-material/Email';
 
+import {
+    fetchEventById,
+    fetchEventGuests,
+    addGuest,
+    addToContactList,
+    deleteGuestById,
+    sendBulkInvitations,
+    generateInvitationLink,
+    fetchUniversalContacts
+} from '../../api/eventDetailsApi';
 
 const UIEventDetails = () => {
     const { id: eventId } = useParams();
@@ -27,69 +35,39 @@ const UIEventDetails = () => {
     const [loading, setLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
-    const socketRef = useRef(null);
     const [showInviteForm, setShowInviteForm] = useState(false);
     const [inviteGuestForm, setInviteGuestForm] = useState({ name: '', email: '', mobile: '' });
-
     const [universalContactsDialog, setUniversalContactsDialog] = useState(false);
     const [universalContacts, setUniversalContacts] = useState([]);
     const [searchUniversal, setSearchUniversal] = useState('');
-
     const [whatsAppLink, setWhatsAppLink] = useState('');
 
-
-    const getAuthHeaders = () => ({
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    });
-
     useEffect(() => {
-        const fetchData = async () => {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                navigate('/login');
-                return;
-            }
+        const token = localStorage.getItem('token');
+        if (!token) {
+            navigate('/login');
+            return;
+        }
 
+        const fetchEventAndContacts = async () => {
             try {
-                const res = await axios.get(`http://localhost:5000/api/events/${eventId}`, getAuthHeaders());
-                setEvent(res.data);
+                const eventData = await fetchEventById(eventId);
+                setEvent(eventData);
             } catch (err) {
                 console.error("Error fetching event:", err);
             }
-
-            fetchContacts(token);
-
-            socketRef.current = io('http://localhost:5000', {
-                auth: { token },
-                transports: ['websocket']
-            });
-
-            const socket = socketRef.current;
-            socket.emit('joinEventRoom', eventId);
-
-            socket.on('guestListUpdated', updatedList => {
-                setContacts(updatedList);
-                setForm({ name: '', email: '', mobile: '' });
-            });
-
-            socket.on('connect_error', () => {
-                console.warn('Socket connection failed, fallback to manual fetch.');
-                fetchContacts(token);
-            });
-
-            return () => {
-                socket.emit('leaveEventRoom', eventId);
-                socket.disconnect();
-            };
+            fetchContacts();
         };
 
-        fetchData();
+        fetchEventAndContacts();
+        const interval = setInterval(fetchContacts, 5000);
+        return () => clearInterval(interval);
     }, [eventId, navigate]);
 
-    const fetchContacts = async (token = localStorage.getItem('token')) => {
+    const fetchContacts = async () => {
         try {
-            const res = await axios.get(`http://localhost:5000/api/guests?eventId=${eventId}`, getAuthHeaders());
-            setContacts(res.data);
+            const data = await fetchEventGuests(eventId);
+            setContacts(data);
         } catch (err) {
             console.error('Error fetching contacts:', err);
         }
@@ -108,21 +86,13 @@ const UIEventDetails = () => {
 
         setLoading(true);
         try {
-            // 1. Add contact to event
-            await axios.post('http://localhost:5000/api/guests', { ...form, eventId }, getAuthHeaders());
-
-            // 2. Add to universal contact list
-            await axios.post('http://localhost:5000/api/contacts', { name, email, mobile }, getAuthHeaders());
-
+            await addGuest({ ...form, eventId });
+            await addToContactList({ name, email, mobile });
             setSuccessMessage(`${name} added to event and your contact list.`);
             setForm({ name: '', email: '', mobile: '' });
         } catch (err) {
-            if (err.response?.status === 400) {
-                alert("This contact already exists.");
-            } else {
-                console.error('Error adding contact:', err);
-                setErrorMessage("Failed to save contact.");
-            }
+            console.error('Error adding contact:', err);
+            setErrorMessage("Failed to save contact.");
         } finally {
             setLoading(false);
         }
@@ -135,7 +105,7 @@ const UIEventDetails = () => {
 
     const handleDeleteConfirmed = async () => {
         try {
-            await axios.delete(`http://localhost:5000/api/guests/${deleteId}`, getAuthHeaders());
+            await deleteGuestById(deleteId);
             setContacts(prev => prev.filter(contact => contact._id !== deleteId));
         } catch (err) {
             console.error('Error deleting contact:', err);
@@ -147,63 +117,32 @@ const UIEventDetails = () => {
 
     const handleInvite = async () => {
         try {
-            const res = await axios.post(`http://localhost:5000/invitations/send/${eventId}`, {}, getAuthHeaders());
-            const baseUrl = "http://localhost:5173/invite";
-            const links = res.data.map(invite => `${baseUrl}/${invite.invitationCode}`);
-
-            if (!links.length) {
-                setErrorMessage("No invitation links generated.");
-                return;
-            }
-
+            const links = await sendBulkInvitations(eventId);
             await navigator.clipboard.writeText(links.join('\n'));
             setSuccessMessage("Invitations sent & links copied to clipboard!");
         } catch (err) {
-            console.error("Invitation error:", err?.response?.data || err.message);
+            console.error("Invitation error:", err);
             setErrorMessage("Failed to send invitations.");
         }
     };
 
     const sendWhatsAppMessage = async (contact) => {
         try {
-            const res = await axios.post(`http://localhost:5000/invitations/autolink`, {
-                guestId: contact._id,
-                eventId
-            }, getAuthHeaders());
-
-            const inviteCode = res.data?.invitationCode || contact._id.slice(-6);
-
-            // What is shown in WhatsApp message (for display only)
+            const inviteCode = await generateInvitationLink(contact._id, eventId);
             const displayUrl = `http://localhost:5173/invite/${inviteCode}`;
-            // What actually works on mobile (local IP)
-            const actualUrl = `http://192.168.1.7:5173/invite/${inviteCode}`;
-
-            const msg = encodeURIComponent(
-                `Hi ${contact.name}, you're invited to ${event.eventTitle}! Join here: ${displayUrl}`
-            );
-
+            const msg = encodeURIComponent(`Hi ${contact.name}, you're invited to ${event.eventTitle}! Join here: ${displayUrl}`);
             const phone = contact.mobile.replace(/[^0-9]/g, '');
             const link = `https://wa.me/${phone}?text=${msg}`;
-
-            // Open actual working link in new tab
             window.open(link, '_blank');
-
-            // Show the actual working link in Snackbar
             setWhatsAppLink(displayUrl);
         } catch (err) {
             console.error("WhatsApp invite failed:", err);
         }
     };
 
-
-
     const sendEmailInvite = async (contact) => {
         try {
-            const res = await axios.post(`http://localhost:5000/invitations/autolink`, {
-                guestId: contact._id,
-                eventId
-            }, getAuthHeaders());
-            const inviteCode = res.data?.invitationCode || contact._id.slice(-6);
+            const inviteCode = await generateInvitationLink(contact._id, eventId);
             const subject = encodeURIComponent(`You're Invited to ${event.eventTitle}`);
             const body = encodeURIComponent(`Hi ${contact.name},\n\nYou're invited to ${event.eventTitle}! Click the link to view: http://localhost:5173/invite/${inviteCode}`);
             window.location.href = `mailto:${contact.email}?subject=${subject}&body=${body}`;
@@ -212,7 +151,6 @@ const UIEventDetails = () => {
         }
     };
 
-
     const handleInviteInputChange = (e) => {
         const { name, value } = e.target;
         setInviteGuestForm(prev => ({ ...prev, [name]: value }));
@@ -220,31 +158,21 @@ const UIEventDetails = () => {
 
     const submitInviteGuest = async () => {
         try {
-            const guestRes = await axios.post('http://localhost:5000/api/guests', {
-                ...inviteGuestForm,
-                eventId
-            }, getAuthHeaders());
-
-            const guestId = guestRes.data._id;
-
-            await axios.post('http://localhost:5000/invitations/autolink', {
-                guestId,
-                eventId
-            }, getAuthHeaders());
-
+            const guest = await addGuest({ ...inviteGuestForm, eventId });
+            await generateInvitationLink(guest._id, eventId);
             setSuccessMessage('Invitation sent successfully!');
             setInviteGuestForm({ name: '', email: '', mobile: '' });
             setTimeout(() => setShowInviteForm(false), 2000);
         } catch (err) {
-            console.error('Error:', err?.response?.data || err.message);
+            console.error('Error:', err);
             setErrorMessage('Failed to send invitation.');
         }
     };
 
-    const fetchUniversalContacts = async (query = '') => {
+    const loadUniversalContacts = async (query = '') => {
         try {
-            const res = await axios.get(`http://localhost:5000/api/contacts?q=${query}`, getAuthHeaders());
-            setUniversalContacts(Array.isArray(res.data.contacts) ? res.data.contacts : res.data);
+            const data = await fetchUniversalContacts(query);
+            setUniversalContacts(data);
         } catch (err) {
             console.error("Failed to load universal contacts:", err);
         }
@@ -252,17 +180,11 @@ const UIEventDetails = () => {
 
     const handleAddFromUniversal = async (contact) => {
         try {
-            await axios.post('http://localhost:5000/api/guests', {
-                name: contact.name,
-                email: contact.email,
-                mobile: contact.mobile,
-                eventId
-            }, getAuthHeaders());
-
+            await addGuest({ name: contact.name, email: contact.email, mobile: contact.mobile, eventId });
             setSuccessMessage(`${contact.name} added to event.`);
             setUniversalContactsDialog(false);
         } catch (err) {
-            console.error("Error adding from universal:", err?.response?.data || err.message);
+            console.error("Error adding from universal:", err);
             setErrorMessage("Failed to add contact from universal list.");
         }
     };
@@ -552,18 +474,7 @@ const UIEventDetails = () => {
                     </a>
                 </Alert>
             </Snackbar>
-
-
-
-
-
         </Box>
-
-
-
-
-
     );
 };
-
 export default UIEventDetails;

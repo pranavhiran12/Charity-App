@@ -350,24 +350,22 @@ exports.respondToInvitation = async(req, res) => {
 
         const invitation = await Invitation.findOneAndUpdate({ invitationCode }, { status }, { new: true }).populate('eventId').populate('guestId');
 
-        if (!invitation) return res.status(404).json({ message: 'Invitation not found' });
+        if (!invitation) {
+            return res.status(404).json({ message: 'Invitation not found' });
+        }
 
         await Guest.findByIdAndUpdate(invitation.guestId._id, { status });
 
-        // 🔥 Emit socket event here (you need to have socket instance)
-        const io = req.app.get('io'); // You must set `io` globally (shown below)
-        io.to(invitation.eventId._id.toString()).emit('inviteeStatusUpdated', {
-            guestId: invitation.guestId._id,
-            name: invitation.guestId.name,
-            mobile: invitation.guestId.mobile,
-            status,
-        });
+        // 🧹 Removed: WebSocket emit
+        // const io = req.app.get('io');
+        // io.to(invitation.eventId._id.toString()).emit('inviteeStatusUpdated', { ... });
 
         res.json({ message: `Invitation ${status}`, invitation });
     } catch (err) {
         res.status(500).json({ message: 'Failed to respond to invitation' });
     }
 };
+
 
 exports.guestRSVP = async(req, res) => {
     const { status } = req.body;

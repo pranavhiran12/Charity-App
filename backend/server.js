@@ -1,7 +1,7 @@
 const http = require('http');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-const { Server } = require('socket.io');
+//const { Server } = require('socket.io');
 const app = require('./app');
 
 // Load environment variables
@@ -11,7 +11,7 @@ dotenv.config();
 const server = http.createServer(app);
 
 // Initialize Socket.IO
-const io = new Server(server, {
+/*const io = new Server(server, {
     cors: {
         origin: "http://localhost:5173",
         methods: ["GET", "POST", "DELETE"],
@@ -39,13 +39,13 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         console.log('❌ Socket disconnected:', socket.id);
     });
-});
+}); */
 
 // Connect to MongoDB before starting the server
-mongoose.connect(process.env.MONGO_URI, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-    })
+mongoose.connect(process.env.MONGO_URI
+        // useNewUrlParser: true,
+        //useUnifiedTopology: true
+    )
     .then(() => {
         console.log('✅ MongoDB connected');
         const PORT = process.env.PORT || 5000;

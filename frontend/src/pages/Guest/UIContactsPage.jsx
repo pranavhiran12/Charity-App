@@ -86,7 +86,14 @@ const UIContactsPage = () => {
 
         setLoading(true);
         try {
-            await axios.post('http://localhost:5000/api/guests', { ...form, eventId }, getAuthHeaders());
+            const res = await axios.post(
+                'http://localhost:5000/api/guests',
+                { ...form, eventId },
+                getAuthHeaders()
+            );
+
+            setContacts(res.data); // 👈 Use updated guest list from server
+            setForm({ name: '', email: '', mobile: '' }); // Reset form
         } catch (err) {
             if (err.response?.status === 400) {
                 alert("This contact already exists for this event.");
@@ -98,6 +105,7 @@ const UIContactsPage = () => {
         }
     };
 
+
     const confirmDelete = (id) => {
         setDeleteId(id);
         setOpenDialog(true);
@@ -105,8 +113,12 @@ const UIContactsPage = () => {
 
     const handleDeleteConfirmed = async () => {
         try {
-            await axios.delete(`http://localhost:5000/api/guests/${deleteId}`, getAuthHeaders());
-            setContacts(prev => prev.filter(contact => contact._id !== deleteId));
+            const res = await axios.delete(
+                `http://localhost:5000/api/guests/${deleteId}`,
+                getAuthHeaders()
+            );
+
+            setContacts(res.data); // ✅ Set updated guest list from server
         } catch (err) {
             console.error('Error deleting contact:', err);
         } finally {
@@ -114,6 +126,7 @@ const UIContactsPage = () => {
             setDeleteId(null);
         }
     };
+
 
     const handleInvite = async () => {
         try {

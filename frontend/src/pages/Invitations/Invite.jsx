@@ -39,12 +39,13 @@ const Invite = () => {
 
     const respondToInvitation = async (response) => {
         try {
-            await axios.put(`http://localhost:5000/invitations/${invitationCode}/respond`, {
+            const res = await axios.put(`http://localhost:5000/invitations/${invitationCode}/respond`, {
                 status: response
             });
+
             alert(`You have ${response === 'accepted' ? 'accepted' : 'declined'} the invitation.`);
-            setInvitation({ ...invitation, status: response });
-            navigate('/dashboard2');
+            setInvitation(res.data.invitation); // ✅ Use updated invitation object
+            navigate(`/dashboard2/event/${invitation.eventId._id}`);
         } catch (err) {
             console.error(err);
             alert('Error submitting RSVP.');

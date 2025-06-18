@@ -4,6 +4,9 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 import CharitySelector from '../Charity/CharitySelector'; // Import CharitySelector component
+// Remove: import axios from 'axios';
+import { createEvent } from '../../api/eventApi'; // Adjust path as needed
+
 
 const templates = {
     blank: {
@@ -98,19 +101,11 @@ const EventTemplateForm = () => {
     };
 
     const handleSubmit = async () => {
-        const token = localStorage.getItem('token');
-
         try {
             console.log("Submitting event:", form);
-
-            const res = await axios.post('http://localhost:5000/api/events', form, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
+            const newEvent = await createEvent(form);
             setMessage('✅ Event created successfully!');
-            console.log("Created Event:", res.data);
+            console.log("Created Event:", newEvent);
         } catch (error) {
             console.error('Create event error:', error.message);
             setMessage('❌ Failed to create event');
