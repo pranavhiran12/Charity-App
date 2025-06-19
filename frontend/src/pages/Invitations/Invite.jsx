@@ -25,7 +25,7 @@ const Invite = () => {
     useEffect(() => {
         const fetchInvitation = async () => {
             try {
-                const res = await axios.get(`http://localhost:5000/invitations/${invitationCode}`);
+                const res = await axios.get(`http://localhost:5000/api/invitations/${invitationCode}`);
                 setInvitation(res.data);
             } catch (err) {
                 console.error(err);
@@ -39,7 +39,7 @@ const Invite = () => {
 
     const respondToInvitation = async (response) => {
         try {
-            const res = await axios.put(`http://localhost:5000/invitations/${invitationCode}/respond`, {
+            const res = await axios.put(`http://localhost:5000/api/invitations/${invitationCode}/respond`, {
                 status: response
             });
 

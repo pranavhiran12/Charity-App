@@ -52,7 +52,7 @@ app.use('/api/charities', charityRoutes);
 app.use('/api/guests', guestRoutes2); // legacy or extra routes
 app.use('/api/contributions', contributionRoutes);
 app.use('/api/dashboard', dashboardRoutes);
-app.use('/invitations', invitationRoutes);
+app.use('/api/invitations', invitationRoutes);
 app.use('/api/profile', profileRoutes); // 👈 User profile save/fetch route
 app.use('/api/contacts', contactRoutes);
 

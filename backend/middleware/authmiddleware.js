@@ -1,30 +1,32 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User'); // ensure you have this
-
-
+const User = require('../models/User');
 
 const authMiddleware = async(req, res, next) => {
     const authHeader = req.headers.authorization;
+
+    // ✅ Proper optional chaining and JWT structure check
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ message: 'Access Denied' });
+        return res.status(401).json({ message: 'No or invalid token format' });
     }
 
+
     const token = authHeader.split(' ')[1];
+    if (!token || token.split('.').length !== 3) {
+        return res.status(401).json({ message: 'JWT malformed' });
+    }
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
         const user = await User.findById(decoded._id || decoded.id);
-        if (!user) return res.status(401).json({ message: 'User not found' });
+        if (!user) {
+            return res.status(401).json({ message: 'User not found' });
+        }
 
-        // ✅ Make sure `req.user._id` is always set
-        // req.user = { _id: user._id }; // or req.user = user if you need more fields
-        req.user = { _id: user._id, id: user._id }; // ✅ now both id and _id will work
-
+        req.user = { _id: user._id };
         next();
     } catch (err) {
-        console.error('Auth Error:', err);
-        return res.status(401).json({ message: 'Invalid Token' });
+        console.error('Auth Error:', err.message);
+        return res.status(401).json({ message: 'Invalid or expired token' });
     }
 };
 
