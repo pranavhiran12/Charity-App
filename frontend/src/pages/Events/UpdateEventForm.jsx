@@ -1,24 +1,23 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import { fetchEventById, updateEventById } from '../../api/eventDetailsApi'; // ✅ Adjust path if needed
 
 export default function UpdateEventForm({ eventId }) {
     const [form, setForm] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Fetch the existing event data
-        const fetchEvent = async () => {
+        const fetchData = async () => {
             try {
-                const response = await axios.get(`http://localhost:5000/api/events/${eventId}`);
-                setForm(response.data);
-                setLoading(false);
+                const data = await fetchEventById(eventId); // ✅ Use separated API call
+                setForm(data);
             } catch (err) {
                 console.error("Failed to fetch event:", err);
                 alert("Event not found");
+            } finally {
                 setLoading(false);
             }
         };
-        fetchEvent();
+        fetchData();
     }, [eventId]);
 
     const handleChange = (e) => {
@@ -44,11 +43,11 @@ export default function UpdateEventForm({ eventId }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.put(`http://localhost:5000/api/events/${eventId}`, form);
-            console.log("Event updated:", response.data);
+            const updated = await updateEventById(eventId, form); // ✅ Use separated API call
+            console.log("Event updated:", updated);
             alert("Event updated successfully!");
         } catch (err) {
-            console.error(err);
+            console.error("Update failed:", err);
             alert("Failed to update event");
         }
     };

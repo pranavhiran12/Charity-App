@@ -9,7 +9,7 @@ import ResendVerification from './pages/Authentication/ResendVerification';
 
 // Events
 import EventPage from './pages/Events/EventPage';
-import CreateEventPage from './pages/Events/CreateEventPage';
+//import CreateEventPage from './pages/Events/CreateEventPage';
 import UpdateEventWrapper from './pages/Events/UpdateEventWrapper';
 import AllEventsPage from './pages/Events/AllEventsPage';
 import AllEvents from './pages/Events/AllEvents';
@@ -18,7 +18,7 @@ import UIEventTemplateForm from './pages/Events/UIEventTemplateForm';
 
 import UIEvent1 from './components/UIEvent1'
 import UIEventDetails from "./pages/Events/UIEventDetails";
-import UISelectEventPage from "./pages/Events/UISelectEventPage";
+//import UISelectEventPage from "./pages/Events/UISelectEventPage";
 
 
 
@@ -77,7 +77,7 @@ function App() {
           <Route path="/resend-verification" element={<ResendVerification />} />
 
           {/* Events */}
-          <Route path="/create-event" element={<CreateEventPage />} />
+
           <Route path="/update-event/:id" element={<UpdateEventWrapper />} />
           <Route path="/event/:eventId" element={<EventPage />} />
           <Route path="/" element={<AllEventsPage />} />

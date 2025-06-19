@@ -1,12 +1,14 @@
-import axios from "axios";
+//import axios from "axios";
+
+import { deleteEventById } from '../../api/eventApi'; // ✅ Adjust the import path as needed
 
 export default function DeleteEventButton({ eventId, onSuccess }) {
     const handleDelete = async () => {
         if (!window.confirm("Are you sure you want to delete this event?")) return;
         try {
-            await axios.delete(`http://localhost:5000/api/events/${eventId}`);
+            await deleteEventById(eventId); // ✅ Use the API function
             alert("Event deleted successfully");
-            onSuccess(); // e.g., redirect or refresh
+            if (onSuccess) onSuccess(); // Call the success handler, e.g., refresh
         } catch (error) {
             console.error("Delete failed:", error);
             alert("Failed to delete event");

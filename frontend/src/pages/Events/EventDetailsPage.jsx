@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { fetchEventById } from '../../api/eventDetailsApi'; // ✅ Adjust the path
 import DeleteEventButton from "./DeleteEventButton";
 
 export default function EventDetailsPage() {
@@ -9,15 +9,15 @@ export default function EventDetailsPage() {
     const [event, setEvent] = useState(null);
 
     useEffect(() => {
-        async function fetchEvent() {
+        async function loadEvent() {
             try {
-                const response = await axios.get(`http://localhost:5000/api/events/${id}`);
-                setEvent(response.data);
+                const data = await fetchEventById(id); // ✅ Use API function
+                setEvent(data);
             } catch (err) {
                 console.error("Error fetching event:", err);
             }
         }
-        fetchEvent();
+        loadEvent();
     }, [id]);
 
     if (!event) return <p className="p-4">Loading...</p>;
@@ -26,10 +26,9 @@ export default function EventDetailsPage() {
         <div className="max-w-xl mx-auto p-6">
             <h1 className="text-2xl font-bold mb-2">{event.eventTitle}</h1>
             <p className="mb-4">{event.eventDescription}</p>
-            {/* 👇 Delete Button */}
             <DeleteEventButton
                 eventId={event._id}
-                onSuccess={() => navigate("/")} // Redirect on delete
+                onSuccess={() => navigate("/")} // ✅ Redirect on delete
             />
         </div>
     );

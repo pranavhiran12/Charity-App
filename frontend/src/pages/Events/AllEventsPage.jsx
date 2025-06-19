@@ -1,22 +1,22 @@
 // src/pages/AllEventsPage.jsx
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { fetchAllEvents, deleteEventById } from '../../api/eventApi'; // ✅ Adjust path if needed
 
 const AllEventsPage = () => {
     const [events, setEvents] = useState([]);
 
     useEffect(() => {
-        const fetchEvents = async () => {
+        const loadEvents = async () => {
             try {
-                const res = await axios.get('http://localhost:5000/api/events');
-                setEvents(res.data);
+                const data = await fetchAllEvents();
+                setEvents(data);
             } catch (err) {
                 console.error('Error fetching events:', err);
             }
         };
 
-        fetchEvents();
+        loadEvents();
     }, []);
 
     const handleDelete = async (eventId) => {
@@ -24,7 +24,7 @@ const AllEventsPage = () => {
         if (!confirmDelete) return;
 
         try {
-            await axios.delete(`http://localhost:5000/api/events/${eventId}`);
+            await deleteEventById(eventId); // ✅ Use API function
             setEvents((prevEvents) => prevEvents.filter((event) => event._id !== eventId));
         } catch (err) {
             console.error('Error deleting event:', err);

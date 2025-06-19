@@ -1,6 +1,6 @@
+// src/pages/UISelectEventPage.jsx
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
 import {
     Box,
     Typography,
@@ -11,25 +11,22 @@ import {
     Button,
 } from '@mui/material';
 import EventIcon from '@mui/icons-material/Event';
+import { fetchEventsWithAuth } from '../api/eventDetailsApi'; // ✅ Adjust path if needed
 
 const UISelectEventPage = () => {
     const [events, setEvents] = useState([]);
 
     useEffect(() => {
-        const fetchEvents = async () => {
+        const loadEvents = async () => {
             try {
-                const res = await axios.get('http://localhost:5000/api/events', {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem('token')}`,
-                    },
-                });
-                setEvents(res.data);
+                const data = await fetchEventsWithAuth(); // ✅ Use the separated API call
+                setEvents(data);
             } catch (err) {
                 console.error('Failed to fetch events:', err);
             }
         };
 
-        fetchEvents();
+        loadEvents();
     }, []);
 
     return (
@@ -50,7 +47,7 @@ const UISelectEventPage = () => {
                                 <CardMedia
                                     component="img"
                                     height="140"
-                                    image={event.imageUrl || '/placeholder.jpg'} // Replace with your fallback or actual field
+                                    image={event.imageUrl || '/placeholder.jpg'}
                                     alt={event.title || 'Event'}
                                 />
                                 <CardContent>

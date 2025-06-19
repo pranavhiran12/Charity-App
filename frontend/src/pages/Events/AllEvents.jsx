@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import { fetchAllEvents } from '../../api/eventDetailsApi'; // Adjust the path if needed
 import EventCard from "./EventCard";
 
 export default function AllEvents() {
     const [events, setEvents] = useState([]);
 
     useEffect(() => {
-        const fetchEvents = async () => {
-            const res = await axios.get("http://localhost:5000/api/events");
-            setEvents(res.data);
+        const loadEvents = async () => {
+            try {
+                const data = await fetchAllEvents();
+                setEvents(data);
+            } catch (err) {
+                console.error("Failed to fetch events:", err);
+            }
         };
-        fetchEvents();
+        loadEvents();
     }, []);
 
     return (

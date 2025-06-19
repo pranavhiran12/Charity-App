@@ -1,9 +1,30 @@
 // src/api/eventDetailsApi.js
 import API from './axios';
 
-// ------------------ Event ------------------
+
+// ------------------ Auth -------------------
+
+export const fetchEventsWithAuth = () =>
+    API.get(`/events`, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+    }).then(res => res.data);
+
+
+
+// ------------------ Events ------------------
+export const fetchAllEvents = () =>
+    API.get(`/events`).then(res => res.data);
+
+
 export const fetchEventById = (eventId) =>
     API.get(`/events/${eventId}`).then(res => res.data);
+
+export const updateEventById = (eventId, data) =>
+    API.put(`/events/${eventId}`, data).then(res => res.data);
+
+
 
 // ------------------ Guests ------------------
 export const fetchEventGuests = (eventId) =>
@@ -25,6 +46,16 @@ export const fetchUniversalContacts = (query = '') =>
     );
 
 // ------------------ Invitations ------------------
+
+export const fetchInvitationByCode = (code) =>
+    API.get(`/invitations/${code}`).then(res => res.data);
+
+
+
+export const respondToInvitation = (code, status) =>
+    API.put(`/invitations/${code}/respond`, { status }).then(res => res.data.invitation);
+
+
 export const sendBulkInvitations = (eventId) =>
     API.post(`/invitations/send/${eventId}`)
     .then(res =>

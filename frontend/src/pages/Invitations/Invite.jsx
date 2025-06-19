@@ -1,19 +1,11 @@
 // src/pages/Invite.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-
 import {
-    Box,
-    Button,
-    Typography,
-    Paper,
-    CircularProgress,
-    Divider,
-    Grid,
-    Chip,
-    Stack,
+    Box, Button, Typography, Paper, CircularProgress, Divider,
+    Grid, Chip, Stack
 } from '@mui/material';
+import { fetchInvitationByCode, respondToInvitation } from '../../api/eventDetailsApi'; // ✅ Adjust path
 
 const Invite = () => {
     const { invitationCode } = useParams();
@@ -23,10 +15,10 @@ const Invite = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchInvitation = async () => {
+        const loadInvitation = async () => {
             try {
-                const res = await axios.get(`http://localhost:5000/api/invitations/${invitationCode}`);
-                setInvitation(res.data);
+                const data = await fetchInvitationByCode(invitationCode); // ✅ API call
+                setInvitation(data);
             } catch (err) {
                 console.error(err);
                 setError('Invitation not found.');
@@ -34,18 +26,15 @@ const Invite = () => {
                 setLoading(false);
             }
         };
-        fetchInvitation();
+        loadInvitation();
     }, [invitationCode]);
 
-    const respondToInvitation = async (response) => {
+    const handleResponse = async (status) => {
         try {
-            const res = await axios.put(`http://localhost:5000/api/invitations/${invitationCode}/respond`, {
-                status: response
-            });
-
-            alert(`You have ${response === 'accepted' ? 'accepted' : 'declined'} the invitation.`);
-            setInvitation(res.data.invitation); // ✅ Use updated invitation object
-            navigate(`/dashboard2/event/${invitation.eventId._id}`);
+            const updated = await respondToInvitation(invitationCode, status); // ✅ API call
+            alert(`You have ${status === 'accepted' ? 'accepted' : 'declined'} the invitation.`);
+            setInvitation(updated);
+            navigate(`/dashboard2/event/${updated.eventId._id}`);
         } catch (err) {
             console.error(err);
             alert('Error submitting RSVP.');
@@ -149,14 +138,14 @@ const Invite = () => {
                             <Button
                                 variant="contained"
                                 color="success"
-                                onClick={() => respondToInvitation('accepted')}
+                                onClick={() => handleResponse('accepted')}
                             >
                                 ✅ Accept
                             </Button>
                             <Button
                                 variant="outlined"
                                 color="error"
-                                onClick={() => respondToInvitation('declined')}
+                                onClick={() => handleResponse('declined')}
                             >
                                 ❌ Decline
                             </Button>
