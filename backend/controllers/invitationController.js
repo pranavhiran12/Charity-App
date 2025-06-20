@@ -407,23 +407,58 @@ exports.getInvitationByCode = async(req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+//const { v4: uuidv4 } = require('uuid');
+//const Invitation = require('../models/Invitation'); // ✅ Adjust path as per your structure
 
 exports.autoLinkInvitation = async(req, res) => {
     const { eventId, guestId } = req.body;
 
-    if (!eventId || !guestId) return res.status(400).json({ message: 'Missing eventId or guestId' });
+    console.log("📥 Received autoLinkInvitation payload:", req.body);
+
+    if (!eventId) {
+        console.warn("❌ Missing eventId");
+        return res.status(400).json({ message: 'Missing eventId' });
+    }
 
     try {
+        // 📎 Handle Public Invite (no guestId)
+        if (!guestId) {
+            const existingPublic = await Invitation.findOne({ eventId, guestId: null });
+
+            if (existingPublic) {
+                return res.status(200).json({ invitationCode: existingPublic.invitationCode });
+            }
+
+            const publicInviteCode = uuidv4();
+
+            const newPublicInvite = new Invitation({
+                eventId,
+                guestId: null,
+                invitationCode: publicInviteCode,
+            });
+
+            await newPublicInvite.save();
+
+            return res.status(201).json({ invitationCode: publicInviteCode });
+        }
+
+        // 🎟️ Handle Guest-Specific Invite
         const existing = await Invitation.findOne({ eventId, guestId });
-        if (existing) return res.status(200).json({ invitationCode: existing.invitationCode });
+
+        if (existing) {
+            return res.status(200).json({ invitationCode: existing.invitationCode });
+        }
 
         const invitationCode = uuidv4();
+
         const newInvitation = new Invitation({ eventId, guestId, invitationCode });
         await newInvitation.save();
 
-        res.status(201).json({ invitationCode });
+        return res.status(201).json({ invitationCode });
+
     } catch (error) {
-        res.status(500).json({ message: 'Error generating/fetching invitation' });
+        console.error("❌ autoLinkInvitation error:", error);
+        return res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
 
@@ -449,6 +484,27 @@ exports.rsvpByInviteCode = async(req, res) => {
 
         res.json({ message: 'RSVP and status updated successfully', guest });
     } catch (err) {
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+exports.updateInvitationWithGuest = async(req, res) => {
+    const { invitationCode, guestId } = req.body;
+
+    if (!invitationCode || !guestId) {
+        return res.status(400).json({ message: 'Missing invitationCode or guestId' });
+    }
+
+    try {
+        const updated = await Invitation.findOneAndUpdate({ invitationCode }, { guestId }, { new: true }).populate('eventId guestId');
+
+        if (!updated) {
+            return res.status(404).json({ message: 'Invitation not found' });
+        }
+
+        res.status(200).json(updated);
+    } catch (error) {
+        console.error("❌ Error updating invitation guestId:", error);
         res.status(500).json({ message: 'Server error' });
     }
 };

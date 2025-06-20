@@ -1,13 +1,13 @@
 const router = require('express').Router();
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
-const { registerUser, loginUser } = require('../controllers/authController');
+const { registerUser, loginUser, verifyEmail } = require('../controllers/authController');
 require('dotenv').config();
 
 // Traditional email/password
 router.post('/register', registerUser);
 router.post('/login', loginUser);
-router.get('/verify/:token', authController.verifyEmail);
+router.get('/verify/:token', verifyEmail);
 
 // Helper to generate token
 const generateToken = (user) => {

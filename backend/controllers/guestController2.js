@@ -19,14 +19,21 @@ const getGuests = async(req, res) => {
 
 // POST a new guest and return updated guest list
 const addGuest = async(req, res) => {
+
+
+    console.log("📥 addGuest reached"); // ✅ First log
     try {
         const { name, email, mobile, eventId } = req.body;
         const normalizedEmail = email.toLowerCase().trim();
 
+        if (!name || !email || !mobile || !eventId) {
+            return res.status(400).json({ message: 'All fields are required.' });
+        }
+
         const existing = await Guest.findOne({
-            userId: req.user._id,
             eventId,
             email: normalizedEmail,
+            ...(req.user && { userId: req.user._id }) // Only check user if logged in
         });
 
         if (existing) {
@@ -38,18 +45,21 @@ const addGuest = async(req, res) => {
             email: normalizedEmail,
             mobile: mobile.trim(),
             eventId,
-            userId: req.user._id
+            userId: req.user ? req.user._id : null // Support public guests
         });
 
         await guest.save();
 
-        // Return updated guest list
-        const updatedList = await Guest.find({ userId: req.user._id, eventId });
-        res.status(201).json(updatedList);
+        console.log("✅ New guest created:", guest);
+
+        res.status(201).json({ message: 'Guest created', guest });
+
     } catch (err) {
+        console.error("❌ Error saving guest:", err.message);
         res.status(400).json({ message: 'Error saving contact', error: err.message });
     }
 };
+
 
 // DELETE guest and return updated guest list
 const deleteGuest = async(req, res) => {

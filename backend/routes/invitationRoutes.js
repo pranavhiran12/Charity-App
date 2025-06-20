@@ -27,7 +27,8 @@ const {
     getInvitationsByEvent,
     getInvitationByCode,
     autoLinkInvitation,
-    rsvpByInviteCode
+    rsvpByInviteCode,
+    updateInvitationWithGuest
 } = require('../controllers/invitationController');
 
 router.post('/send/:eventId', sendInvitation);
@@ -37,5 +38,6 @@ router.get('/event/:eventId', getInvitationsByEvent);
 router.get('/:code', getInvitationByCode);
 router.post('/autolink', autoLinkInvitation);
 router.put('/rsvp/:inviteCode', rsvpByInviteCode);
+router.put('/update-guest', updateInvitationWithGuest);
 
 module.exports = router;
