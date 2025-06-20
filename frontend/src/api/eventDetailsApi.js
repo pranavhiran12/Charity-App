@@ -36,6 +36,12 @@ export const addGuest = (data) =>
 export const deleteGuestById = (guestId) =>
     API.delete(`/guests/${guestId}`);
 
+/*export const fetchGuestsForEvent = async(eventId) => {
+    const res = await API.get(`/guests?eventId=${eventId}`);
+    return res.data;
+};*/
+
+
 // ------------------ Contacts ------------------
 export const addToContactList = (data) =>
     API.post(`/contacts`, data);
@@ -62,21 +68,40 @@ export const sendBulkInvitations = (eventId) =>
         res.data.map(i => `http://localhost:5173/invite/${i.invitationCode}`)
     );
 
+// eventDetailsApi.js
 export const generateInvitationLink = async(guestId, eventId) => {
     try {
-        const res = await API.post(`/invitations/autolink`, { guestId, eventId });
-        console.log("🔍 Response from /autolink:", res.data);
+        const payload = {
+            eventId: eventId,
+            guestId: typeof guestId !== 'undefined' && guestId !== null ? guestId : null
+        };
 
-        const code = res && res.data && res.data.invitationCode;
+        console.log("📤 Sending payload to /autolink:", payload);
 
-        if (!code) {
-            console.warn("⚠️ No invitationCode found in response", res.data);
-            return null;
+        const res = await API.post('/invitations/autolink', payload);
+
+        if (res && res.data && res.data.invitationCode) {
+            return res.data.invitationCode;
         }
 
-        return code;
-    } catch (err) {
-        console.error("❌ Error generating invitation link:", err);
         return null;
+
+    } catch (err) {
+        console.error("❌ Error generating invitation link:", (err.response && err.response.data) || err.message);
+        return null;
+    }
+};
+
+export const updateInvitationWithGuest = async(invitationCode, guestId) => {
+    try {
+        const res = await API.put(`/invitations/update-guest`, {
+            invitationCode,
+            guestId
+        });
+        return res.data;
+    } catch (err) {
+        console.error("❌ Failed to update invitation with guest:", (err.response && err.response.data) || err.message);
+
+        throw err;
     }
 };

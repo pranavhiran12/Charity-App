@@ -20,7 +20,7 @@ const InviteeList = () => {
     useEffect(() => {
         const fetchInvitees = async () => {
             try {
-                const res = await axios.get(`http://localhost:5000/invitations/event/${eventId}`);
+                const res = await axios.get(`http://localhost:5000/api/invitations/event/${eventId}`);
                 setInvitees(res.data);
             } catch (err) {
                 console.error('Error fetching invitees:', err);

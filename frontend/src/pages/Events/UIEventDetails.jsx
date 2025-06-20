@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography } from '@mui/material';
+import { QRCodeCanvas } from 'qrcode.react';
+
+import { Box, Typography, TextField, IconButton, Tooltip } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 import EventOverview from '../../components/EventDetails/EventOverview';
-
 import InvitationActions from '../../components/EventDetails/InvitationActions';
 import InviteOneForm from '../../components/EventDetails/InviteOneForm';
 import GuestListTable from '../../components/EventDetails/GuestListTable';
@@ -41,7 +43,7 @@ const UIEventDetails = () => {
         universalContacts: [],
         searchUniversal: '',
         whatsAppLink: '',
-        //setWhatsAppLink: ''
+        publicInviteCode: '',
     });
 
     const setField = (field, value) => setState(prev => ({ ...prev, [field]: value }));
@@ -50,16 +52,30 @@ const UIEventDetails = () => {
         const token = localStorage.getItem('token');
         if (!token) return navigate('/login');
 
-        (async () => {
+        const initialize = async () => {
             try {
                 const eventData = await fetchEventById(eventId);
                 setField('event', eventData);
-            } catch (err) {
-                console.error("Error fetching event:", err);
-            }
-            fetchContacts();
-        })();
 
+                // ✅ Direct call with guestId = null
+                const publicInviteCode = await generateInvitationLink(null, eventId);
+
+                if (publicInviteCode) {
+                    console.log("✅ Public Invite Code:", publicInviteCode);
+                    setField('publicInviteCode', publicInviteCode);
+                } else {
+                    console.warn("❌ No public invite code received.");
+                }
+
+            } catch (err) {
+                console.error("Error initializing event details or public link:", err);
+                setField('errorMessage', 'Failed to load event or invitation link');
+            }
+
+            fetchContacts();
+        };
+
+        initialize();
         const interval = setInterval(fetchContacts, 5000);
         return () => clearInterval(interval);
     }, [eventId, navigate]);
@@ -115,6 +131,7 @@ const UIEventDetails = () => {
             setField('errorMessage', "Failed to send invitations.");
         }
     };
+
     const sendWhatsAppMessage = async (contact) => {
         try {
             if (!contact?._id || !eventId) {
@@ -124,29 +141,23 @@ const UIEventDetails = () => {
             }
 
             const inviteCode = await generateInvitationLink(contact._id, eventId);
-            console.log("Generated inviteCode:", inviteCode); // <-- should NOT be null
-
             if (!inviteCode) {
                 setField('errorMessage', 'Failed to generate WhatsApp invite link.');
                 return;
             }
 
             const displayUrl = `${window.location.origin}/invite/${inviteCode}`;
-            const msg = encodeURIComponent(
-                `Hi ${contact.name}, you're invited to ${state.event.eventTitle}! Join here: ${displayUrl}`
-            );
+            const msg = encodeURIComponent(`Hi ${contact.name}, you're invited to ${state.event.eventTitle}! Join here: ${displayUrl}`);
             const phone = contact.mobile.replace(/[^0-9]/g, '');
             const link = `https://wa.me/${phone}?text=${msg}`;
 
             window.open(link, '_blank');
-            setField('whatsAppLink', displayUrl); // ✅ Store the final URL
+            setField('whatsAppLink', displayUrl);
         } catch (err) {
             console.error("WhatsApp invite failed:", err);
             setField('errorMessage', 'WhatsApp invite failed.');
         }
     };
-
-
 
     const sendEmailInvite = async (contact) => {
         try {
@@ -164,7 +175,6 @@ const UIEventDetails = () => {
             setField('errorMessage', 'Email invite failed.');
         }
     };
-
 
     const submitInviteGuest = async () => {
         try {
@@ -205,18 +215,99 @@ const UIEventDetails = () => {
         }
     };
 
+    const inviteLink = state.publicInviteCode ? `${window.location.origin}/invite/${state.publicInviteCode}` : '';
+
     return (
-        <Box sx={{ p: { xs: 2, sm: 4, md: 6 }, maxWidth: 1000, mx: 'auto' }}>
-            <EventOverview event={state.event} />
-            <InvitationActions {...{ handleInvite, setField, loadUniversalContacts }} state={state} />
-            {state.showInviteForm && <InviteOneForm {...{ state, setField, submitInviteGuest }} />}
-            <GuestListTable {...{ state, sendWhatsAppMessage, sendEmailInvite, setField }} />
-            <AddContactForm {...{ state, handleAdd, setField }} />
-            <ConfirmDeleteDialog {...{ state, setField, handleDeleteConfirmed }} />
-            <UniversalContactsDialog {...{ state, setField, loadUniversalContacts, handleAddFromUniversal }} />
-            <Snackbars {...{ state, setField }} />
+        <Box sx={{ py: 4, px: { xs: 2, sm: 4, md: 6 }, maxWidth: 1000, mx: 'auto' }}>
+            <Box
+                sx={{
+                    p: 4,
+                    borderRadius: 4,
+                    boxShadow: 3,
+                    backgroundColor: 'background.paper',
+                }}
+            >
+                <Typography variant="h4" fontWeight={600} gutterBottom>
+                    Event Details
+                </Typography>
+
+                <EventOverview event={state.event} />
+
+                {/* Invite Link Section */}
+                <Box mt={4}>
+                    <Typography variant="h6" fontWeight={500} gutterBottom>
+                        Public Invitation Link
+                    </Typography>
+
+                    <Box display="flex" alignItems="center" gap={2}>
+                        <TextField
+                            label="Invite Link"
+                            variant="outlined"
+                            value={inviteLink || 'Generating...'}
+                            InputProps={{ readOnly: true }}
+                            fullWidth
+                            error={!inviteLink}
+                            helperText={!inviteLink ? 'Public link not available yet.' : ''}
+                        />
+                        <Tooltip title={inviteLink ? "Copy Link" : "No link to copy"}>
+                            <span>
+                                <IconButton
+                                    onClick={() => navigator.clipboard.writeText(inviteLink)}
+                                    disabled={!inviteLink}
+                                    sx={{ bgcolor: 'grey.100', '&:hover': { bgcolor: 'grey.200' } }}
+                                >
+                                    <ContentCopyIcon />
+                                </IconButton>
+                            </span>
+                        </Tooltip>
+                    </Box>
+
+                    {/* QR Code Section */}
+                    {inviteLink && (
+                        <Box mt={4} display="flex" flexDirection="column" alignItems="center">
+                            <Typography variant="subtitle1" gutterBottom>
+                                Scan to open invite
+                            </Typography>
+                            <Box
+                                sx={{
+                                    p: 2,
+                                    borderRadius: 2,
+                                    bgcolor: 'grey.100',
+                                    boxShadow: 1,
+                                }}
+                            >
+                                <QRCodeCanvas value={inviteLink} size={180} />
+                            </Box>
+                        </Box>
+                    )}
+                </Box>
+
+                {/* Other Functional Sections */}
+                <Box mt={5}>
+                    <InvitationActions {...{ handleInvite, setField, loadUniversalContacts }} state={state} />
+                </Box>
+
+                {state.showInviteForm && (
+                    <Box mt={4}>
+                        <InviteOneForm {...{ state, setField, submitInviteGuest }} />
+                    </Box>
+                )}
+
+                <Box mt={4}>
+                    <GuestListTable {...{ state, sendWhatsAppMessage, sendEmailInvite, setField }} />
+                </Box>
+
+                <Box mt={4}>
+                    <AddContactForm {...{ state, handleAdd, setField }} />
+                </Box>
+
+                <ConfirmDeleteDialog {...{ state, setField, handleDeleteConfirmed }} />
+                <UniversalContactsDialog {...{ state, setField, loadUniversalContacts, handleAddFromUniversal }} />
+                <Snackbars {...{ state, setField }} />
+            </Box>
         </Box>
     );
+
 };
 
 export default UIEventDetails;
