@@ -2,10 +2,13 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useParams } from 'react-router-dom';
 
 
+
+
 // Auth
 import Register from './pages/Authentication/Register';
 import Login from './pages/Authentication/Login';
 import ResendVerification from './pages/Authentication/ResendVerification';
+import Verified from './pages/Authentication/ResendVerification';
 
 // Events
 import EventPage from './pages/Events/EventPage';
@@ -75,6 +78,8 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/resend-verification" element={<ResendVerification />} />
+
+          <Route path="/verified" element={<Verified />} />
 
           {/* Events */}
 

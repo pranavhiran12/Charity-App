@@ -7,6 +7,7 @@ require('dotenv').config();
 // Traditional email/password
 router.post('/register', registerUser);
 router.post('/login', loginUser);
+router.get('/verify/:token', authController.verifyEmail);
 
 // Helper to generate token
 const generateToken = (user) => {
@@ -14,6 +15,9 @@ const generateToken = (user) => {
         process.env.JWT_SECRET, { expiresIn: '1d' }
     );
 };
+
+
+
 
 // Google OAuth
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
@@ -47,5 +51,7 @@ router.get('/facebook/callback',
         res.redirect(`http://localhost:5173/dashboard?token=${token}`);
     }
 );
+
+
 
 module.exports = router;
