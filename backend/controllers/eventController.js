@@ -3,19 +3,23 @@ const Event = require('../models/Event');
 // @desc    Create new event
 exports.createEvent = async(req, res) => {
     try {
+        // console.log("✅ Authenticated user ID:", req.user ? ._id);
+
         const eventData = {
             ...req.body,
-            host: req.user.id, // authenticated user
+            host: req.user._id, // ✅ Corrected this line
         };
 
         const newEvent = new Event(eventData);
         await newEvent.save();
+
         res.status(201).json(newEvent);
     } catch (err) {
-        console.error('Error creating event:', err);
-        res.status(500).json({ message: 'Failed to create event', error: err.message });
+        console.error("❌ Error creating event:", err);
+        res.status(500).json({ message: "Failed to create event", error: err.message });
     }
 };
+
 
 // @desc    Get all events
 exports.getAllEvents = async(req, res) => {

@@ -5,13 +5,15 @@ import {
     Box, Button, Typography, Paper, CircularProgress, Divider,
     Grid, Chip, Stack, TextField
 } from '@mui/material';
+import axios from 'axios';
 
 import {
     fetchInvitationByCode,
     respondToInvitation,
     addToContactList,
     addGuest,
-    updateInvitationWithGuest
+    updateInvitationWithGuest,
+    createRazorpayOrder
 } from '../../api/eventDetailsApi';
 
 const Invite = () => {
@@ -20,6 +22,7 @@ const Invite = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [form, setForm] = useState({ name: '', email: '', mobile: '' });
+    const [contribution, setContribution] = useState({ amount: '', message: '' });
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -48,14 +51,12 @@ const Invite = () => {
             const cleanedEmail = form.email.trim().toLowerCase();
             const cleanedMobile = form.mobile.trim();
 
-            // Step 1: Save to Universal Contact List
             await addToContactList({
                 name: cleanedName,
                 email: cleanedEmail,
                 mobile: cleanedMobile,
             });
 
-            // Step 2: Add guest to this event (returns guest object now)
             const response = await addGuest({
                 name: cleanedName,
                 email: cleanedEmail,
@@ -63,18 +64,14 @@ const Invite = () => {
                 eventId: invitation.eventId._id
             });
 
-            console.log("🧾 addGuest response from backend:", response); // <== add this
             const newGuest = response.guest;
-
             if (!newGuest || !newGuest._id) {
                 setError('Guest could not be verified after creation.');
                 return;
             }
 
-            // Step 3: Update invitation with guestId
             await updateInvitationWithGuest(invitationCode, newGuest._id);
 
-            // Step 4: Update invitation state and reset form
             setInvitation(prev => ({
                 ...prev,
                 guestId: newGuest,
@@ -82,15 +79,11 @@ const Invite = () => {
 
             setForm({ name: '', email: '', mobile: '' });
             setError('');
-
         } catch (err) {
             console.error('❌ Registration failed:', err.response?.data || err.message || err);
             setError(err.response?.data?.message || 'Failed to register. Try again.');
         }
     };
-
-
-
 
     const handleResponse = async (status) => {
         try {
@@ -105,6 +98,84 @@ const Invite = () => {
         }
     };
 
+    /* const handleContribute = () => {
+         alert(`Contribution of ₹${contribution.amount} with message: "${contribution.message}" will be processed via Razorpay.`);
+     };*/
+
+    const handleContribute = async () => {
+        try {
+            const amount = parseInt(contribution.amount);
+            if (isNaN(amount) || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+
+            // 1. Create Razorpay Order
+            const { data: order } = await axios.post('http://localhost:5000/api/payments/create-order', {
+                amount,
+                message: contribution.message,
+                eventId: invitation?.eventId?._id,
+                guestId: invitation?.guestId?._id
+            });
+
+            // 2. Setup Razorpay Options
+            const options = {
+                key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+                amount: order.amount,
+                currency: order.currency,
+                name: invitation?.eventId?.eventTitle || "Event",
+                description: contribution.message || 'Gift Contribution',
+                order_id: order.id,
+                handler: async function (response) {
+                    try {
+                        await axios.post('http://localhost:5000/api/payments/save', {
+                            razorpayPaymentId: response.razorpay_payment_id,
+                            razorpayOrderId: response.razorpay_order_id,
+                            razorpaySignature: response.razorpay_signature,
+                            amount,
+                            message: contribution.message,
+                            eventId: invitation?.eventId?._id,
+                            guestId: invitation?.guestId?._id
+                        });
+
+                        window.location.assign(`/thankyou?amount=${amount}`);
+                    } catch (err) {
+                        console.error("❌ Failed to save payment:", err);
+                        alert("Payment succeeded, but we couldn't save your contribution.");
+                    }
+                },
+                prefill: {
+                    name: invitation.guestId?.name || '',
+                    email: invitation.guestId?.email || '',
+                    contact: invitation.guestId?.mobile || ''
+                },
+                theme: {
+                    color: '#1976d2'
+                },
+                method: {
+                    upi: true,
+                    card: true,
+                    wallet: true,
+                    netbanking: true,
+                    emi: true
+                },
+                modal: {
+                    ondismiss: () => {
+                        alert("Payment popup closed");
+                    }
+                }
+            };
+
+            const rzp = new window.Razorpay(options);
+            rzp.open();
+
+        } catch (err) {
+            console.error("❌ Contribution error:", err);
+            alert('Failed to initiate payment.');
+        }
+    };
+
+
     if (loading) {
         return (
             <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
@@ -113,7 +184,7 @@ const Invite = () => {
         );
     }
 
-    if (error) {
+    if (error && !invitation) {
         return (
             <Box textAlign="center" p={4}>
                 <Typography color="error">{error}</Typography>
@@ -189,7 +260,7 @@ const Invite = () => {
 
                     <Divider />
 
-                    {invitation && !invitation.guestId ? (
+                    {!invitation.guestId ? (
                         <Box mt={3}>
                             <Typography variant="h6">Please enter your details to accept the invitation:</Typography>
                             <TextField
@@ -225,38 +296,63 @@ const Invite = () => {
                             )}
                         </Box>
                     ) : (
-                        <Box textAlign="center">
-                            <Typography variant="subtitle1" fontWeight={500}>
-                                👤 Guest: {invitation.guestId?.name}
-                            </Typography>
-                            <Typography variant="subtitle2" color="text.secondary">
-                                Hosted by: {event.host.name}
-                            </Typography>
-
-                            <Stack direction="row" justifyContent="center" spacing={2} mt={3}>
-                                <Button
-                                    variant="contained"
-                                    color="success"
-                                    onClick={() => handleResponse('accepted')}
-                                >
-                                    ✅ Accept
-                                </Button>
-                                <Button
-                                    variant="outlined"
-                                    color="error"
-                                    onClick={() => handleResponse('declined')}
-                                >
-                                    ❌ Decline
-                                </Button>
-                            </Stack>
-
-                            {invitation.status && (
-                                <Typography variant="body2" color="text.secondary" mt={2}>
-                                    You have <strong>{invitation.status}</strong> this invitation.
-                                </Typography>
-                            )}
+                        <Box mt={3}>
+                            <Typography variant="h6">Contribute to this event:</Typography>
+                            <TextField
+                                fullWidth
+                                label="Amount (₹)"
+                                value={contribution.amount}
+                                onChange={(e) => setContribution({ ...contribution, amount: e.target.value })}
+                                sx={{ my: 1 }}
+                            />
+                            <TextField
+                                fullWidth
+                                label="Message"
+                                value={contribution.message}
+                                onChange={(e) => setContribution({ ...contribution, message: e.target.value })}
+                                sx={{ my: 1 }}
+                            />
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={handleContribute}
+                            >
+                                Contribute
+                            </Button>
                         </Box>
                     )}
+
+                    <Box textAlign="center">
+                        <Typography variant="subtitle1" fontWeight={500}>
+                            👤 Guest: {invitation.guestId?.name || 'Anonymous'}
+                        </Typography>
+                        <Typography variant="subtitle2" color="text.secondary">
+                            Hosted by: {event.host.name}
+                        </Typography>
+
+                        <Stack direction="row" justifyContent="center" spacing={2} mt={3}>
+                            <Button
+                                variant="contained"
+                                color="success"
+                                onClick={() => handleResponse('accepted')}
+                            >
+                                ✅ Accept
+                            </Button>
+                            <Button
+                                variant="outlined"
+                                color="error"
+                                onClick={() => handleResponse('declined')}
+                            >
+                                ❌ Decline
+                            </Button>
+                        </Stack>
+
+                        {invitation.status && (
+                            <Typography variant="body2" color="text.secondary" mt={2}>
+                                You have <strong>{invitation.status}</strong> this invitation.
+                            </Typography>
+                        )}
+                    </Box>
                 </Stack>
             </Paper>
         </Box>

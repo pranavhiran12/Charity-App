@@ -56,6 +56,9 @@ app.use('/api/invitations', invitationRoutes);
 app.use('/api/profile', profileRoutes); // 👈 User profile save/fetch route
 app.use('/api/contacts', contactRoutes);
 
+app.use('/api/payments', require('./routes/paymentRoutes'));
+
+
 // Debug/test route
 app.post('/api/guests-debug', (req, res) => {
     res.json({ message: "🔥 POST /api/guests-debug hit" });

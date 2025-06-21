@@ -105,3 +105,14 @@ export const updateInvitationWithGuest = async(invitationCode, guestId) => {
         throw err;
     }
 };
+
+// ------------------ Razorpay ------------------
+export const createRazorpayOrder = async(data) => {
+    try {
+        const res = await API.post('/razorpay/create-order', data);
+        return res.data;
+    } catch (err) {
+        console.error("❌ Failed to create Razorpay order:", err.response && err.response.data || err.message);
+        throw err;
+    }
+};
