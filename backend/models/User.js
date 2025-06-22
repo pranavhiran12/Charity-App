@@ -15,7 +15,17 @@ const userSchema = new mongoose.Schema({
         }
     },
     googleId: String,
-    facebookId: String
+    facebookId: String,
+    profilePic: {
+        type: String,
+        default: ''
+    },
+
+    isVerified: {
+        type: Boolean,
+        default: false
+    },
+    verificationToken: String
 });
 
 module.exports = mongoose.model("User", userSchema);
