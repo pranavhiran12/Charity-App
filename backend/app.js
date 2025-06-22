@@ -36,8 +36,10 @@ const contributionRoutes = require('./routes/contributionRoutes');
 const invitationRoutes = require('./routes/invitationRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const profileRoutes = require('./routes/profileRoutes'); // 👈 You’ll create this
-
+const razorpayRoutes = require('./routes/razorpayRoutes');
 const contactRoutes = require('./routes/contactRoutes');
+
+const notificationRoutes = require('./routes/notificationRoutes');
 
 // ✅ Health check
 app.get('/', (req, res) => {
@@ -57,6 +59,16 @@ app.use('/api/profile', profileRoutes); // 👈 User profile save/fetch route
 app.use('/api/contacts', contactRoutes);
 
 app.use('/api/payments', require('./routes/paymentRoutes'));
+//app.use('/api/payments', require('./routes/paymentRoutes'));
+
+app.use('/api/razorpay', razorpayRoutes);
+
+
+
+// ✅ Mount it under your API
+app.use('/api/notifications', notificationRoutes);
+
+
 
 
 // Debug/test route

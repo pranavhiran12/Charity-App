@@ -1,17 +1,24 @@
 const Event = require('../models/Event');
+const Notification = require('../models/Notification');
 
 // @desc    Create new event
 exports.createEvent = async(req, res) => {
     try {
-        // console.log("✅ Authenticated user ID:", req.user ? ._id);
-
         const eventData = {
             ...req.body,
-            host: req.user._id, // ✅ Corrected this line
+            host: req.user._id,
         };
 
         const newEvent = new Event(eventData);
         await newEvent.save();
+
+        // ✅ Create a notification for the event creator
+        await Notification.create({
+            userId: req.user._id,
+            type: 'event',
+            message: `Your event "${newEvent.name}" was created successfully.`,
+            link: `/dashboard2/events/${newEvent._id}`
+        });
 
         res.status(201).json(newEvent);
     } catch (err) {

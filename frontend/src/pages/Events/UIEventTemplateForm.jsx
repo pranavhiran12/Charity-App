@@ -2,10 +2,18 @@ import React, { useState } from 'react';
 import {
     Box, Button, TextField, MenuItem, Typography, Grid, InputAdornment
 } from '@mui/material';
-import axios from 'axios';
+//import axios from 'axios';
 import CharitySelector from '../Charity/CharitySelector'; // Import CharitySelector component
 // Remove: import axios from 'axios';
 import { createEvent } from '../../api/eventApi'; // Adjust path as needed
+
+import { toast } from 'react-toastify';
+
+import { useNavigate } from 'react-router-dom';
+
+import CircularProgress from '@mui/material/CircularProgress';
+
+
 
 
 const templates = {
@@ -56,7 +64,13 @@ const templates = {
 const EventTemplateForm = () => {
     const [templateKey, setTemplateKey] = useState('blank');
     const [form, setForm] = useState(templates['blank']);
-    const [message, setMessage] = useState('');
+    //const [message, setMessage] = useState('');
+
+    const [loading, setLoading] = useState(false);
+    const [errors, setErrors] = useState({});
+
+
+    const navigate = useNavigate();
 
     const handleTemplateChange = (e) => {
         const selected = e.target.value;
@@ -100,15 +114,46 @@ const EventTemplateForm = () => {
         });
     };
 
+    const validateForm = () => {
+        const newErrors = {};
+
+        if (!form.childName) newErrors.childName = 'Child name is required';
+        if (!form.eventTitle) newErrors.eventTitle = 'Event title is required';
+        if (!form.eventDate) newErrors.eventDate = 'Date is required';
+        if (!form.time) newErrors.time = 'Time is required';
+        if (!form.venue) newErrors.venue = 'Venue is required';
+        if (!form.giftName) newErrors.giftName = 'Gift name is required';
+        if (!form.totalTargetAmount || form.totalTargetAmount <= 0)
+            newErrors.totalTargetAmount = 'Target amount must be a positive number';
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+
+
     const handleSubmit = async () => {
+
+        if (!validateForm()) {
+            toast.error("❌ Please fix the form errors");
+            return;
+        }
+
+        setLoading(true);
+
         try {
             console.log("Submitting event:", form);
             const newEvent = await createEvent(form);
-            setMessage('✅ Event created successfully!');
+            toast.success("🎉 Event created successfully!");
             console.log("Created Event:", newEvent);
+
+
+            navigate(`/dashboard2/event/${newEvent._id}`);
         } catch (error) {
             console.error('Create event error:', error.message);
-            setMessage('❌ Failed to create event');
+            toast.error("❌ Failed to create event");
+        } finally {
+            setLoading(false); // ✅ used here too
         }
     };
 
@@ -133,25 +178,32 @@ const EventTemplateForm = () => {
 
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
-                    <TextField label="Child Name" name="childName" value={form.childName} onChange={handleChange} fullWidth />
+                    <TextField label="Child Name" name="childName" value={form.childName} onChange={handleChange} fullWidth error={!!errors.childName}
+                        helperText={errors.childName} />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                    <TextField label="Event Title" name="eventTitle" value={form.eventTitle} onChange={handleChange} fullWidth />
+                    <TextField label="Event Title" name="eventTitle" value={form.eventTitle} onChange={handleChange} fullWidth error={!!errors.eventTitle}
+                        helperText={errors.eventTitle} />
                 </Grid>
                 <Grid item xs={12}>
-                    <TextField label="Description" name="eventDescription" value={form.eventDescription} onChange={handleChange} fullWidth />
+                    <TextField label="Description" name="eventDescription" value={form.eventDescription} onChange={handleChange} fullWidth error={!!errors.eventDescription}
+                        helperText={errors.eventDescription} />
                 </Grid>
                 <Grid item xs={6}>
-                    <TextField label="Date" name="eventDate" type="date" value={form.eventDate} onChange={handleChange} fullWidth InputLabelProps={{ shrink: true }} />
+                    <TextField label="Date" name="eventDate" type="date" value={form.eventDate} onChange={handleChange} fullWidth InputLabelProps={{ shrink: true }} error={!!errors.eventDate}
+                        helperText={errors.eventDate} />
                 </Grid>
                 <Grid item xs={6}>
-                    <TextField label="Time" name="time" type="time" value={form.time} onChange={handleChange} fullWidth InputLabelProps={{ shrink: true }} />
+                    <TextField label="Time" name="time" type="time" value={form.time} onChange={handleChange} fullWidth InputLabelProps={{ shrink: true }} error={!!errors.time}
+                        helperText={errors.time} />
                 </Grid>
                 <Grid item xs={12}>
-                    <TextField label="Venue" name="venue" value={form.venue} onChange={handleChange} fullWidth />
+                    <TextField label="Venue" name="venue" value={form.venue} onChange={handleChange} fullWidth error={!!errors.venue}
+                        helperText={errors.venue} />
                 </Grid>
                 <Grid item xs={12}>
-                    <TextField label="Gift Name" name="giftName" value={form.giftName} onChange={handleChange} fullWidth />
+                    <TextField label="Gift Name" name="giftName" value={form.giftName} onChange={handleChange} fullWidth error={!!errors.giftName}
+                        helperText={errors.giftName} />
                 </Grid>
                 <Grid item xs={12}>
                     <CharitySelector onSelect={handleCharitySelect} />
@@ -230,15 +282,15 @@ const EventTemplateForm = () => {
                 </Grid>
             </Grid>
 
-            <Button variant="contained" onClick={handleSubmit} sx={{ mt: 3, px: 4 }}>
-                SAVE EVENT
+            <Button
+                variant="contained"
+                onClick={handleSubmit}
+                sx={{ mt: 3, px: 4 }}
+                disabled={loading}
+                startIcon={loading && <CircularProgress size={20} color="inherit" />}
+            >
+                {loading ? 'Saving...' : 'SAVE EVENT'}
             </Button>
-
-            {message && (
-                <Typography variant="body2" sx={{ mt: 2, color: message.includes('success') ? 'green' : 'red' }}>
-                    {message}
-                </Typography>
-            )}
         </Box>
     );
 };

@@ -12,8 +12,8 @@ import {
     respondToInvitation,
     addToContactList,
     addGuest,
-    updateInvitationWithGuest,
-    createRazorpayOrder
+    updateInvitationWithGuest
+    // createRazorpayOrder
 } from '../../api/eventDetailsApi';
 
 const Invite = () => {

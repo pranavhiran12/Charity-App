@@ -18,9 +18,10 @@
   "homepage": "https://github.com/pranavhiran12/twopresents#readme",
   "description": "",
   "dependencies": {
-    "@mui/icons-material": "^7.1.1",
+    "@mui/icons-material": "^7.1.2",
     "qrcode.react": "^4.2.0",
     "razorpay": "^2.9.6",
+    "react-toastify": "^11.0.5",
     "socket.io-client": "^4.8.1"
   }
 }
