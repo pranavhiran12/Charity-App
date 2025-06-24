@@ -10,7 +10,6 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: function() {
-            // Only required if NOT using OAuth
             return !this.googleId && !this.facebookId;
         }
     },
@@ -20,12 +19,18 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
-
     isVerified: {
         type: Boolean,
         default: false
     },
-    verificationToken: String
+    verificationToken: String,
+
+    // ✅ Add this field
+    role: {
+        type: String,
+        enum: ['user', 'admin'],
+        default: 'user'
+    }
 });
 
 module.exports = mongoose.model("User", userSchema);

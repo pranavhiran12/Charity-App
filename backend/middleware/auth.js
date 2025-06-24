@@ -9,19 +9,20 @@ const authMiddleware = async(req, res, next) => {
     }
 
     const token = authHeader.split(' ')[1];
-    if (!token || token.split('.').length !== 3) {
-        return res.status(401).json({ message: 'JWT malformed' });
+    if (!token) {
+        return res.status(401).json({ message: "Unauthorized" });
     }
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await User.findById(decoded._id || decoded.id);
+
+        const user = await User.findById(decoded.id).select('-password'); // optionally exclude password
 
         if (!user) {
             return res.status(401).json({ message: 'User not found' });
         }
 
-        // ✅ Attach user info (including role) to req.user
+        // ✅ Attach the full user (including role) to request
         req.user = {
             _id: user._id,
             email: user.email,
@@ -32,7 +33,7 @@ const authMiddleware = async(req, res, next) => {
         next();
     } catch (err) {
         console.error('Auth Error:', err.message);
-        return res.status(401).json({ message: 'Invalid or expired token' });
+        return res.status(403).json({ message: "Forbidden" });
     }
 };
 

@@ -50,6 +50,15 @@ import Invite from './pages/Invitations/Invite';
 import InviteeList from './components/InviteeList';
 import GenerateInvite from './pages/Invitations/GenerateInvite';
 
+
+
+//admin
+
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminUsers from './pages/admin/Users';
+import AdminEvents from './pages/admin/Events';
+import AdminCharities from './pages/admin/Charities'
+
 // OAuth redirect handler (optional if you want to use it)
 /*const OAuthSuccess = () => {
   const params = new URLSearchParams(window.location.search);
@@ -123,6 +132,17 @@ function App() {
           <Route path="/rsvp/:code" element={<RSVPPage />} />
           <Route path="/generate-invite" element={<GenerateInvite />} />
           <Route path="/invite/:invitationCode" element={<Invite />} />
+
+          {/* Admin */}
+
+          <Route path="/admin" element={<Dashboard2 />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="events" element={<AdminEvents />} />
+            <Route path="charities" element={<AdminCharities />} />
+          </Route>
+
+
 
           {/* 404 */}
           <Route

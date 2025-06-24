@@ -8,6 +8,7 @@ const BACKEND_URL = "http://localhost:5000";
 export default function Login() {
     const [form, setForm] = useState({ email: "", password: "" });
     const [loading, setLoading] = useState(false);
+    const [isAdminLogin, setIsAdminLogin] = useState(false);
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -19,22 +20,44 @@ export default function Login() {
         setLoading(true);
 
         try {
-            console.log("📤 Sending login request with:", form);
+            const payload = {
+                email: form.email.trim().toLowerCase(),
+                password: form.password,
+                ...(isAdminLogin ? { role: 'admin' } : {}) // ✅ only include role if admin
+            };
 
-            const res = await axios.post(`${BACKEND_URL}/api/auth/login`, form);
+            console.log("📤 Sending login request to backend with payload:", payload);
 
-            console.log("✅ Response from backend:", res.data); // Add this line
+            const res = await axios.post(`${BACKEND_URL}/api/auth/login`, payload, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                withCredentials: true, // optional if your backend uses cookies
+            });
 
-            toast.success("✅ Login successful!");
+            const { token, user } = res.data;
 
-            localStorage.setItem("token", res.data.token);
-            if (res.data.user) {
-                localStorage.setItem("user", JSON.stringify(res.data.user));
+            if (isAdminLogin && user.role !== 'admin') {
+                toast.error("❌ You are not authorized as an admin.");
+                console.warn(`❌ User is not admin. User role = ${user.role}`);
+                setLoading(false);
+                return;
             }
 
-            navigate("/dashboard2");
+            toast.success("✅ Login successful!");
+            localStorage.setItem("token", token);
+            localStorage.setItem("user", JSON.stringify(user));
+
+            if (user.role === 'admin') {
+                console.log("🔐 Redirecting to /admin dashboard");
+                navigate("/admin");
+            } else {
+                console.log("👤 Redirecting to /dashboard2");
+                navigate("/dashboard2");
+            }
+
         } catch (err) {
-            console.error("❌ Login error (raw):", err);
+            console.error("❌ Login error:", err);
 
             const errorMsg =
                 err.response?.data?.error ||
@@ -46,8 +69,6 @@ export default function Login() {
             setLoading(false);
         }
     };
-
-
     return (
         <div className="d-flex align-items-center justify-content-center vh-100" style={{ backgroundColor: "#d8f3dc" }}>
             <div className="login-card text-center">
@@ -78,6 +99,20 @@ export default function Login() {
                         />
                     </div>
 
+                    {/* ✅ Admin login checkbox */}
+                    <div className="form-check mb-3 text-start">
+                        <input
+                            type="checkbox"
+                            className="form-check-input"
+                            id="adminCheck"
+                            checked={isAdminLogin}
+                            onChange={() => setIsAdminLogin(!isAdminLogin)}
+                        />
+                        <label className="form-check-label" htmlFor="adminCheck">
+                            Login as Admin
+                        </label>
+                    </div>
+
                     <button
                         type="submit"
                         className="btn btn-green w-100"
@@ -93,7 +128,6 @@ export default function Login() {
 
                 <hr className="my-4" />
 
-                {/* Social login buttons */}
                 <div className="social-buttons">
                     <a
                         href={`${BACKEND_URL}/api/auth/google`}

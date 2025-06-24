@@ -39,6 +39,11 @@ const profileRoutes = require('./routes/profileRoutes'); // 👈 You’ll create
 const razorpayRoutes = require('./routes/razorpayRoutes');
 const contactRoutes = require('./routes/contactRoutes');
 
+
+const adminRoutes = require('./routes/adminRoutes');
+
+
+
 const notificationRoutes = require('./routes/notificationRoutes');
 
 // ✅ Health check
@@ -62,6 +67,8 @@ app.use('/api/payments', require('./routes/paymentRoutes'));
 //app.use('/api/payments', require('./routes/paymentRoutes'));
 
 app.use('/api/razorpay', razorpayRoutes);
+
+app.use('/api/admin', adminRoutes);
 
 
 

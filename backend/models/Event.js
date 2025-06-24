@@ -21,14 +21,13 @@ const eventSchema = new mongoose.Schema({
     },
     time: {
         type: String,
-        required: true // e.g., "5:00 PM" or "17:00"
+        required: true
     },
     venue: {
         type: String,
-        required: true // e.g., "Community Hall, Mumbai"
+        required: true
     },
     eventImage: String,
-
     giftName: {
         type: String,
         required: true
@@ -41,7 +40,6 @@ const eventSchema = new mongoose.Schema({
             ref: 'Charity'
         }
     },
-
     totalTargetAmount: {
         type: Number,
         required: true
@@ -50,23 +48,18 @@ const eventSchema = new mongoose.Schema({
         gift: { type: Number, default: 50 },
         charity: { type: Number, default: 50 }
     },
-
     guestsInvited: [{
         name: String,
         email: String,
         invitedAt: { type: Date, default: Date.now }
     }],
-
     status: {
         type: String,
         enum: ['upcoming', 'completed', 'cancelled'],
         default: 'upcoming'
-    },
-
-    createdAt: {
-        type: Date,
-        default: Date.now
     }
+}, {
+    timestamps: true // ✅ Important for `createdAt` and `updatedAt`
 });
 
 module.exports = mongoose.model('Event', eventSchema);
