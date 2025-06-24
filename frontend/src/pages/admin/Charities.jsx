@@ -21,7 +21,6 @@ const AdminCharities = () => {
     const [editMode, setEditMode] = useState(false);
     const [formData, setFormData] = useState({ name: '', description: '', website: '', logoUrl: '', image: null });
 
-
     const fetchCharities = async () => {
         try {
             const token = localStorage.getItem("token");
@@ -30,7 +29,6 @@ const AdminCharities = () => {
                     Authorization: `Bearer ${token}`,
                 },
             });
-
             const data = Array.isArray(res.data) ? res.data : [];
             setCharities(data);
             setFilteredCharities(data);
@@ -40,7 +38,6 @@ const AdminCharities = () => {
             setLoading(false);
         }
     };
-
 
     useEffect(() => {
         fetchCharities();
@@ -76,20 +73,44 @@ const AdminCharities = () => {
         setOpenDialog(false);
     };
 
+    const handleFileUpload = async (file) => {
+        const form = new FormData();
+        form.append('file', file);
+
+        const res = await axios.post('http://localhost:5000/api/upload', form, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+
+        return res.data.url;
+    };
+
     const handleSubmit = async () => {
         try {
-            const data = new FormData();
-            data.append('name', formData.name);
-            data.append('description', formData.description);
-            data.append('website', formData.website);
-            data.append('logoUrl', formData.logoUrl);
-            if (formData.image) data.append('image', formData.image);
+            let uploadedUrl = formData.logoUrl;
+
+            if (formData.image instanceof File) {
+                uploadedUrl = await handleFileUpload(formData.image);
+            }
+
+            const payload = {
+                name: formData.name,
+                description: formData.description,
+                website: formData.website,
+                logoUrl: uploadedUrl,
+            };
+
+            const token = localStorage.getItem("token");
 
             if (editMode) {
-                await axios.put(`http://localhost:5000/api/admin/charity/${formData._id}`, data);
+                await axios.put(`http://localhost:5000/api/admin/charity/${formData._id}`, payload, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
             } else {
-                await axios.post(`http://localhost:5000/api/admin/charity`, data);
+                await axios.post(`http://localhost:5000/api/admin/charity`, payload, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
             }
+
             fetchCharities();
             handleCloseDialog();
         } catch (err) {
@@ -168,11 +189,8 @@ const AdminCharities = () => {
                                 currentCharities.map(charity => (
                                     <TableRow key={charity._id} hover sx={{ transition: '0.2s', '&:hover': { backgroundColor: '#fdf2f8' } }}>
                                         <TableCell>
-                                            {charity.image || charity.logoUrl ? (
-                                                <Avatar
-                                                    alt={charity.name}
-                                                    src={charity.image ? `/uploads/${charity.image}` : charity.logoUrl}
-                                                />
+                                            {charity.logoUrl ? (
+                                                <Avatar alt={charity.name} src={charity.logoUrl} />
                                             ) : 'N/A'}
                                         </TableCell>
                                         <TableCell>{charity.name}</TableCell>
@@ -237,7 +255,7 @@ const AdminCharities = () => {
                             onChange={(e) => setFormData({ ...formData, website: e.target.value })}
                         />
                         <TextField
-                            label="Logo URL"
+                            label="Logo URL (optional)"
                             fullWidth
                             value={formData.logoUrl}
                             onChange={(e) => setFormData({ ...formData, logoUrl: e.target.value })}

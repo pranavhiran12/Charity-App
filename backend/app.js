@@ -38,6 +38,7 @@ const dashboardRoutes = require('./routes/dashboardRoutes');
 const profileRoutes = require('./routes/profileRoutes'); // 👈 You’ll create this
 const razorpayRoutes = require('./routes/razorpayRoutes');
 const contactRoutes = require('./routes/contactRoutes');
+const uploadRoutes = require('./routes/upload');
 
 
 const adminRoutes = require('./routes/adminRoutes');
@@ -76,7 +77,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/notifications', notificationRoutes);
 
 
-
+app.use('/api', uploadRoutes);
 
 // Debug/test route
 app.post('/api/guests-debug', (req, res) => {
