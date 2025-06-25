@@ -288,6 +288,8 @@ exports.sendInvitation = async(req, res) => {
                     guestId: guest._id,
                     invitationCode: code,
                     status: "pending",
+                    sender: req.user._id, // ✅ required
+                    email: guest.email // ✅ required
                 });
 
                 await invitation.save();
@@ -508,3 +510,73 @@ exports.updateInvitationWithGuest = async(req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
+
+// GET /api/invitations/received
+exports.getReceivedInvitations = async(req, res) => {
+
+    console.log("🚨 getReceivedInvitations function called!");
+    console.log("🔐 req.user:", req.user);
+    try {
+        const userEmail = req.user && req.user.email;
+        console.log("📧 userEmail:", userEmail);
+        if (!userEmail) {
+            return res.status(400).json({ message: "User email missing." });
+        }
+
+        // Find all guests with this email
+        const guests = await Guest.find({ email: userEmail });
+        console.log("👥 Matching guests:", guests.length, guests);
+        const guestIds = guests.map(g => g._id);
+
+        // Find invitations where:
+        // - guestId matches a guest with this email
+        // - OR invitation.email matches user email (for direct email invites)
+        const invitations = await Invitation.find({
+                $or: [
+                    { guestId: { $in: guestIds } },
+                    { email: userEmail }
+                ]
+            })
+            .populate('eventId')
+            .populate('guestId');
+
+        console.log("📨 Invitations found:", invitations.length, invitations);
+
+        res.json(invitations);
+    } catch (err) {
+        console.error("Error fetching received invitations:", err);
+        res.status(500).json({ message: "Server error fetching invitations." });
+    }
+};
+
+/*exports.getReceivedInvitations = async(req, res) => {
+    const userEmail = req.user && req.user.email;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 6;
+    const skip = (page - 1) * limit;
+
+    if (!userEmail) return res.status(400).json({ message: "User email missing." });
+
+    const guests = await Guest.find({ email: userEmail });
+    const guestIds = guests.map(g => g._id);
+
+    const query = {
+        $or: [
+            { guestId: { $in: guestIds } },
+            { email: userEmail }
+        ]
+    };
+
+    const [invitations, totalCount] = await Promise.all([
+        Invitation.find(query)
+        .populate('eventId')
+        .populate('guestId')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+        Invitation.countDocuments(query),
+    ]);
+
+    res.json({ invitations, totalCount });
+};*/

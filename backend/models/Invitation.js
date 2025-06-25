@@ -9,13 +9,21 @@ const invitationSchema = new mongoose.Schema({
     guestId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Guest',
-        default: null, // ✅ allow public invites
-        required: false
+        default: null // For public invites
     },
     invitationCode: {
         type: String,
         required: true,
         unique: true
+    },
+    email: {
+        type: String,
+        required: true // This is the email of the invited person
+    },
+    sender: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true // This is the user who sent the invite
     },
     status: {
         type: String,

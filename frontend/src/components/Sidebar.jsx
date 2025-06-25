@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import {
   Event,
-  Mail,
+  MarkEmailUnread,
   People,
   AccountCircle,
   Logout
@@ -28,7 +28,7 @@ const Sidebar = () => {
 
   const menuItems = [
     { text: 'Events', icon: <Event />, path: '/dashboard2/UIevent1' },
-    { text: 'Invites', icon: <Mail />, path: '/dashboard2/invitees' },
+    { text: 'Invitations Received', icon: <MarkEmailUnread />, path: '/dashboard2/invitations/received' }, // ✅ Only this remains
     { text: 'Contacts', icon: <People />, path: '/dashboard2/contacts' },
     { text: 'Profile', icon: <AccountCircle />, path: '/dashboard2/profile' },
   ];
@@ -62,7 +62,9 @@ const Sidebar = () => {
           </Typography>
         </Box>
       </Toolbar>
+
       <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} />
+
       <List>
         {menuItems.map((item) => (
           <ListItem key={item.text} disablePadding>

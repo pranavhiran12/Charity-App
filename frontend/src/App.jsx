@@ -34,6 +34,11 @@ import UIGuestAddressBook from './pages/Guest/UIGuestAddressBook';
 import UIContactsPage from './pages/Guest/UIContactsPage';
 import UIUniversalContactsPage from './pages/Guest/UIUniversalContactsPage';
 
+import TestAddGuest from './pages/TestAddGuest';
+
+
+
+
 // Contributions
 import Contribute from './pages/Contributions/Contribute';
 import ContributePage from './pages/Contributions/ContributePage';
@@ -49,6 +54,9 @@ import UIUserProfilePage from './pages/UIUserProfilePage';
 import Invite from './pages/Invitations/Invite';
 import InviteeList from './components/InviteeList';
 import GenerateInvite from './pages/Invitations/GenerateInvite';
+import ReceivedInvitations from './pages/Invitations/ReceivedInvitations';
+import TestSendInvitationForm from './pages/Invitations/TestSendInvitationForm';
+
 
 
 
@@ -107,6 +115,7 @@ function App() {
 
           {/* Dashboard */}
           <Route path="/dashboard" element={<Dashboard />} />
+
           <Route path="/dashboard2" element={<Dashboard2 />}>
             <Route path="UIEvent1" element={<UIEvent1 />} />
             <Route path="create-template-event" element={<UIEventTemplateForm />} />
@@ -114,7 +123,10 @@ function App() {
             <Route path="contacts/:eventId" element={<UIContactsPage />} />
             <Route path="profile" element={<UIUserProfilePage />} />
             <Route path="invitees/:eventId" element={<InviteeList />} />
+            <Route path="invitations/received" element={<ReceivedInvitations />} /> {/* ✅ This line added */}
+            <Route path="test-send-invite" element={<TestSendInvitationForm />} />
           </Route>
+
           <Route path="/dashboard2/event/:id" element={<UIEventDetails />} />
 
           {/* Guest */}
@@ -122,6 +134,8 @@ function App() {
           <Route path="/event/:eventId/guests" element={<EventWrapper><ViewGuests /></EventWrapper>} />
           <Route path="/guest/:guestId/contributions" element={<GuestContributionsWrapper />} />
           <Route path="/event/:eventId/addressbook" element={<UIGuestAddressBook />} />
+
+          <Route path="/test-add-guest" element={<TestAddGuest />} />
 
           {/* Contributions */}
           <Route path="/event/:eventId/contribute" element={<EventWrapper><ContributePage /></EventWrapper>} />

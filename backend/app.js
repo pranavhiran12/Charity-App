@@ -79,6 +79,9 @@ app.use('/api/notifications', notificationRoutes);
 
 app.use('/api', uploadRoutes);
 
+app.use('/api/users', require('./routes/userRoutes'));
+
+
 // Debug/test route
 app.post('/api/guests-debug', (req, res) => {
     res.json({ message: "🔥 POST /api/guests-debug hit" });

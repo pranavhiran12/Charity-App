@@ -78,8 +78,44 @@ const deleteGuest = async(req, res) => {
     }
 };
 
+
+// CREATE guest without requiring authentication (for public invite link)
+const createGuest = async(req, res) => {
+    try {
+        const { name, email, mobile, eventId } = req.body;
+
+        if (!name || !email || !mobile || !eventId) {
+            return res.status(400).json({ message: 'All fields are required.' });
+        }
+
+        const normalizedEmail = email.toLowerCase().trim();
+
+        const existing = await Guest.findOne({ eventId, email: normalizedEmail });
+        if (existing) {
+            return res.status(400).json({ message: 'This guest already exists for this event.' });
+        }
+
+        const newGuest = new Guest({
+            name: name.trim(),
+            email: normalizedEmail,
+            mobile: mobile.trim(),
+            eventId,
+            userId: null // public guest, no auth
+        });
+
+        await newGuest.save();
+        res.status(201).json({ message: 'Public guest created', guest: newGuest });
+
+    } catch (err) {
+        console.error("❌ Error creating public guest:", err.message);
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+};
+
+
 module.exports = {
     getGuests,
     addGuest,
-    deleteGuest
+    deleteGuest,
+    createGuest
 };

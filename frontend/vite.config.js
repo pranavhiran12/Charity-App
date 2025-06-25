@@ -14,6 +14,10 @@ export default defineConfig({
         fs: {
             strict: true,
             allow: ['.']
+        },
+        // 👇 ADD THIS PROXY BLOCK
+        proxy: {
+            '/api': 'http://localhost:5000'
         }
     },
     build: {
