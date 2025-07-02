@@ -422,6 +422,12 @@ exports.autoLinkInvitation = async(req, res) => {
         return res.status(400).json({ message: 'Missing eventId' });
     }
 
+    const user = req.user; // You must have authMiddleware in place
+
+    if (!user || !user._id || !user.email) {
+        return res.status(401).json({ message: 'Unauthorized: Missing user info' });
+    }
+
     try {
         // 📎 Handle Public Invite (no guestId)
         if (!guestId) {
@@ -436,6 +442,9 @@ exports.autoLinkInvitation = async(req, res) => {
             const newPublicInvite = new Invitation({
                 eventId,
                 guestId: null,
+                sender: user._id,
+                email: user.email,
+                name: user.name || "Guest",
                 invitationCode: publicInviteCode,
             });
 
@@ -453,7 +462,15 @@ exports.autoLinkInvitation = async(req, res) => {
 
         const invitationCode = uuidv4();
 
-        const newInvitation = new Invitation({ eventId, guestId, invitationCode });
+        const newInvitation = new Invitation({
+            eventId,
+            guestId,
+            sender: user._id,
+            email: user.email,
+            name: user.name || "Guest",
+            invitationCode,
+        });
+
         await newInvitation.save();
 
         return res.status(201).json({ invitationCode });
@@ -463,7 +480,6 @@ exports.autoLinkInvitation = async(req, res) => {
         return res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
-
 exports.rsvpByInviteCode = async(req, res) => {
     try {
         const { inviteCode } = req.params;
@@ -580,3 +596,66 @@ exports.getReceivedInvitations = async(req, res) => {
 
     res.json({ invitations, totalCount });
 };*/
+
+// ✅ GET /api/invitations/stats/:eventId
+/*exports.getInvitationStats = async(req, res) => {
+    const { eventId } = req.params;
+
+    if (!eventId) {
+        return res.status(400).json({ message: "Event ID is required" });
+    }
+
+    try {
+        const invitedCount = await Invitation.countDocuments({ eventId });
+        const acceptedCount = await Invitation.countDocuments({ eventId, status: 'accepted' });
+
+        res.json({ invited: invitedCount, accepted: acceptedCount });
+    } catch (err) {
+        console.error("❌ Error fetching invitation stats:", err);
+        res.status(500).json({ message: "Server error fetching stats" });
+    }
+};*/
+
+// ✅ GET /api/invitations/stats/:eventId
+exports.getInvitationStats = async(req, res) => {
+    const { eventId } = req.params;
+
+    try {
+        const counts = await Invitation.aggregate([{
+                $match: {
+                    eventId: new mongoose.Types.ObjectId(eventId)
+                }
+            },
+            {
+                $project: {
+                    normalizedStatus: {
+                        $switch: {
+                            branches: [
+                                { case: { $eq: ["$status", "accepted"] }, then: "accepted" },
+                                { case: { $eq: ["$status", "declined"] }, then: "declined" },
+                                { case: { $eq: ["$status", "pending"] }, then: "pending" }
+                            ],
+                            default: "pending"
+                        }
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: "$normalizedStatus",
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+
+        const result = { accepted: 0, declined: 0, pending: 0 };
+        counts.forEach(item => {
+            result[item._id] = item.count;
+        });
+
+        res.json(result);
+    } catch (err) {
+        console.error("❌ Error fetching RSVP status count:", err);
+        res.status(500).json({ error: "Server error" });
+    }
+};

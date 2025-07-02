@@ -2,6 +2,8 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import './Login.css';
+
 
 const BACKEND_URL = "http://localhost:5000";
 

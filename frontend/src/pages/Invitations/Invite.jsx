@@ -91,10 +91,12 @@ const Invite = () => {
             alert(`You have ${status === 'accepted' ? 'accepted' : 'declined'} the invitation.`);
             setInvitation(updated);
             navigate(`/dashboard2/event/${updated.eventId._id}`);
+            window.location.reload();
         } catch (err) {
             console.error(err);
             alert('Error submitting RSVP.');
             navigate('/dashboard2');
+            window.location.reload();
         }
     };
 

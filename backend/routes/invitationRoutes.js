@@ -9,6 +9,7 @@ const {
     rsvpByInviteCode,
     updateInvitationWithGuest,
     getReceivedInvitations, // ✅ added
+    getInvitationStats
     //getInvitationsByUser        // ✅ optional: all sent invites by user
 } = require('../controllers/invitationController');
 
@@ -41,8 +42,10 @@ router.get('/event/:eventId', getInvitationsByEvent);
 router.get('/:code', getInvitationByCode);
 
 // Linking and guest update
-router.post('/autolink', autoLinkInvitation);
+router.post('/autolink', authMiddleware, autoLinkInvitation);
 router.put('/update-guest', updateInvitationWithGuest);
+
+router.get('/stats/:eventId', getInvitationStats);
 
 // ✅ New: Received invitations for logged-in user
 

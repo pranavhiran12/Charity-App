@@ -1,0 +1,70 @@
+/* Login.css */
+
+body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #edf6f9, #d8f3dc);
+    font-family: 'Outfit', sans-serif;
+}
+
+.login-card {
+    background-color: #ffffff;
+    border-radius: 20px;
+    padding: 40px 30px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+}
+
+.login-title {
+    color: #2d6a4f;
+    font-weight: 600;
+    font-size: 1.75rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.form-control {
+    border-radius: 10px;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+}
+
+.form-control:focus {
+    border-color: #2d6a4f;
+    box-shadow: 0 0 0 0.15rem rgba(45, 106, 79, 0.25);
+    outline: none;
+}
+
+.btn-green {
+    background-color: #2d6a4f;
+    color: white;
+    padding: 0.75rem;
+    border-radius: 10px;
+    font-weight: 600;
+    border: none;
+    transition: background-color 0.3s;
+}
+
+.btn-green:hover {
+    background-color: #1b4332;
+}
+
+.link-green {
+    color: #2d6a4f;
+    text-align: center;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.link-green:hover {
+    text-decoration: underline;
+}
+
+.social-buttons .btn {
+    border-radius: 10px;
+    font-weight: 500;
+    padding: 10px;
+}

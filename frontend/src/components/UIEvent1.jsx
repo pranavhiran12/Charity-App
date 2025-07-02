@@ -17,8 +17,11 @@ import {
     deleteEventById,
 } from '../api/eventApi';
 
+import axios from 'axios';
+
 const UIEvent1 = () => {
     const [events, setEvents] = useState([]);
+    const [invitationStats, setInvitationStats] = useState({});
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -26,8 +29,25 @@ const UIEvent1 = () => {
             try {
                 const data = await fetchAllEvents();
                 setEvents(data);
+
+                const statsMap = {};
+                for (const event of data) {
+                    try {
+                        const res = await axios.get(`/api/invitations/stats/${event._id}`);
+                        const stats = res.data;
+                        statsMap[event._id] = {
+                            invited: stats.accepted + stats.declined + stats.pending,
+                            accepted: stats.accepted
+
+                        };
+                    } catch (err) {
+                        console.warn(`Failed to fetch stats for event ${event._id}`, err);
+                        statsMap[event._id] = { invited: 0, accepted: 0 };
+                    }
+                }
+                setInvitationStats(statsMap);
             } catch (err) {
-                console.error("Error fetching events:", err);
+                console.error("Error fetching events or stats:", err);
             }
         };
         fetchEvents();
@@ -47,7 +67,6 @@ const UIEvent1 = () => {
 
     return (
         <Box sx={{ p: { xs: 2, md: 4 }, backgroundColor: '#f3f4f6', minHeight: '100vh' }}>
-            {/* Page Header */}
             <Box
                 sx={{
                     display: 'flex',
@@ -81,7 +100,6 @@ const UIEvent1 = () => {
                 </Button>
             </Box>
 
-            {/* Event Cards Grid */}
             <Grid container spacing={4}>
                 {events.map((event, idx) => (
                     <Grid item xs={12} sm={6} md={4} key={idx}>
@@ -100,7 +118,6 @@ const UIEvent1 = () => {
                             }}
                         >
                             <CardContent>
-                                {/* Event Icon + Title */}
                                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                                     <Avatar
                                         sx={{
@@ -119,7 +136,6 @@ const UIEvent1 = () => {
                                     </Typography>
                                 </Box>
 
-                                {/* Description */}
                                 <Typography
                                     variant="body2"
                                     color="text.secondary"
@@ -135,7 +151,6 @@ const UIEvent1 = () => {
                                     {event.eventDescription}
                                 </Typography>
 
-                                {/* Info Rows */}
                                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.2 }}>
                                     <AccessTimeIcon fontSize="small" sx={{ mr: 1, color: '#6b7280' }} />
                                     <Typography variant="body2">
@@ -148,17 +163,19 @@ const UIEvent1 = () => {
                                 </Box>
                                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.2 }}>
                                     <PeopleAltIcon fontSize="small" sx={{ mr: 1, color: '#6b7280' }} />
-                                    <Typography variant="body2">Invited: {event.guestsInvited?.length || 0}</Typography>
+                                    <Typography variant="body2">
+                                        Invited: {invitationStats[event._id]?.invited ?? 0}
+
+                                    </Typography>
                                 </Box>
                                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                     <DoneAllIcon fontSize="small" sx={{ mr: 1, color: '#10b981' }} />
                                     <Typography variant="body2" sx={{ color: '#10b981' }}>
-                                        Accepted: {event.guestsInvited?.filter(g => g.status === 'accepted').length || 0}
+                                        Accepted: {invitationStats[event._id]?.accepted ?? 0}
                                     </Typography>
                                 </Box>
                             </CardContent>
 
-                            {/* Actions */}
                             <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
                                 <Button
                                     size="small"

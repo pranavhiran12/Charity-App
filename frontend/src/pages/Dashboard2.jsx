@@ -9,7 +9,16 @@ const Dashboard2 = () => {
       <Sidebar />
 
       {/* Main Content Area */}
-      <Box component="main" sx={{ flexGrow: 1 }}>
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          bgcolor: '#f9fafb', // or your preferred color
+          minHeight: '100vh',
+          overflow: 'auto',
+        }}
+      >
+
         <Toolbar /> {/* Keeps top spacing for AppBar */}
 
         <Container maxWidth="xl" sx={{ pt: 3 }}>
