@@ -1,0 +1,317 @@
+/* UIEventTemplateForm.css */
+
+
+/* --- Background SVG Wave --- */
+
+.ui-event-template-bg {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.ui-event-template-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 220px;
+    background: url('data:image/svg+xml;utf8,<svg width="100%25" height="220" viewBox="0 0 1440 220" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0 120L80 110C160 100 320 80 480 90C640 100 800 140 960 150C1120 160 1280 140 1360 130L1440 120V0H1360C1280 0 1120 0 960 0C800 0 640 0 480 0C320 0 160 0 80 0H0V120Z" fill="%236366f1" fill-opacity="0.12"/></svg>') no-repeat top center;
+    z-index: 1;
+}
+
+.ui-event-template-form {
+    background: #fff;
+    max-width: 700px;
+    width: 100%;
+    margin: 0 auto;
+    border-radius: 28px;
+    box-shadow: 0 10px 32px rgba(99, 102, 241, 0.10), 0 2px 8px rgba(99, 102, 241, 0.06);
+    padding: 40px 32px 32px 32px;
+    position: relative;
+    z-index: 2;
+    animation: fadeInUp 0.7s cubic-bezier(.4, 2, .6, 1);
+    border: 1.5px solid #e0e7ff;
+    transition: box-shadow 0.3s, border-color 0.3s;
+}
+
+.ui-event-template-form:focus-within,
+.ui-event-template-form:hover {
+    box-shadow: 0 16px 40px rgba(99, 102, 241, 0.18), 0 2px 8px rgba(99, 102, 241, 0.10);
+    border-color: #6366f1;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.ui-event-template-title {
+    font-size: 2.1rem;
+    font-weight: 800;
+    color: #3730a3;
+    margin-bottom: 18px;
+    letter-spacing: -1px;
+    text-align: center;
+    text-shadow: 0 2px 8px rgba(99, 102, 241, 0.08);
+}
+
+
+/* --- Section Headings & Dividers --- */
+
+.ui-event-template-section {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #6366f1;
+    margin-top: 28px;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+}
+
+.ui-event-template-divider {
+    border: none;
+    border-top: 1.5px dashed #e0e7ff;
+    margin: 18px 0 24px 0;
+}
+
+
+/* --- Animated Input Focus --- */
+
+.ui-event-template-form .MuiInputBase-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 2px #6366f133;
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+
+/* --- Error Message Styling --- */
+
+.ui-event-template-form .MuiFormHelperText-root.Mui-error {
+    color: #ef4444 !important;
+    font-weight: 500;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+
+/* --- Event Image Preview --- */
+
+.ui-event-template-image-preview {
+    display: block;
+    max-width: 100%;
+    max-height: 180px;
+    margin: 12px auto 0 auto;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(99, 102, 241, 0.13);
+    object-fit: cover;
+    border: 1.5px solid #e0e7ff;
+}
+
+
+/* --- Save Button Animation --- */
+
+.ui-event-template-save-btn {
+    background: linear-gradient(135deg, #6366f1, #3b82f6);
+    color: #fff;
+    font-weight: bold;
+    border-radius: 24px;
+    padding: 12px 36px;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.12);
+    margin-top: 32px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    transition: background 0.3s, box-shadow 0.3s, transform 0.2s;
+    letter-spacing: 1px;
+}
+
+.ui-event-template-save-btn:hover {
+    background: linear-gradient(135deg, #4f46e5, #2563eb);
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.18);
+    transform: translateY(-2px) scale(1.03);
+}
+
+
+/* --- Responsive tweaks --- */
+
+@media (max-width: 800px) {
+    .ui-event-template-form {
+        padding: 24px 8px 24px 8px;
+    }
+    .ui-event-template-title {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 500px) {
+    .ui-event-template-form {
+        border-radius: 12px;
+        padding: 10px 2px 18px 2px;
+    }
+}
+
+
+/* --- Progress Bar --- */
+
+.ui-event-template-progress {
+    width: 100%;
+    margin: 0 auto 28px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.ui-event-template-progress-step {
+    flex: 1;
+    height: 7px;
+    border-radius: 6px;
+    background: #e0e7ff;
+    transition: background 0.3s;
+    position: relative;
+}
+
+.ui-event-template-progress-step.active {
+    background: linear-gradient(90deg, #6366f1 60%, #3b82f6 100%);
+    box-shadow: 0 2px 8px #6366f133;
+}
+
+.ui-event-template-progress-step.completed {
+    background: linear-gradient(90deg, #10b981 60%, #3b82f6 100%);
+}
+
+
+/* --- Tooltip --- */
+
+.ui-event-template-tooltip {
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+}
+
+.ui-event-template-tooltip .ui-event-template-tooltip-text {
+    visibility: hidden;
+    width: 180px;
+    background: #312e81;
+    color: #fff;
+    text-align: center;
+    border-radius: 8px;
+    padding: 8px 10px;
+    position: absolute;
+    z-index: 10;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 0.95rem;
+    pointer-events: none;
+}
+
+.ui-event-template-tooltip:hover .ui-event-template-tooltip-text,
+.ui-event-template-tooltip:focus .ui-event-template-tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+
+/* --- Live Validation Icons --- */
+
+.ui-event-template-valid-icon {
+    color: #10b981;
+    margin-left: 6px;
+    vertical-align: middle;
+    font-size: 1.2em;
+}
+
+.ui-event-template-invalid-icon {
+    color: #ef4444;
+    margin-left: 6px;
+    vertical-align: middle;
+    font-size: 1.2em;
+}
+
+
+/* --- Animated Success Checkmark Overlay --- */
+
+.ui-event-template-success-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(243, 244, 246, 0.92);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.ui-event-template-success-check {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #10b981 60%, #3b82f6 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18px;
+    animation: popIn 0.6s cubic-bezier(.4, 2, .6, 1);
+}
+
+@keyframes popIn {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    80% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.ui-event-template-success-check svg {
+    color: #fff;
+    font-size: 3.2rem;
+}
+
+.ui-event-template-success-message {
+    font-size: 1.3rem;
+    color: #10b981;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.ui-event-template-success-summary {
+    color: #312e81;
+    font-size: 1.1rem;
+    text-align: center;
+    margin-bottom: 18px;
+}

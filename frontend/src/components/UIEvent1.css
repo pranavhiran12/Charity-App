@@ -1,0 +1,273 @@
+/* UIEvent1.css */
+
+
+/* --- Animated SVG Wave Background --- */
+
+.ui-event1-bg {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+    padding: 32px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.ui-event1-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 220px;
+    background: url('data:image/svg+xml;utf8,<svg width="100%25" height="220" viewBox="0 0 1440 220" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0 120L80 110C160 100 320 80 480 90C640 100 800 140 960 150C1120 160 1280 140 1360 130L1440 120V0H1360C1280 0 1120 0 960 0C800 0 640 0 480 0C320 0 160 0 80 0H0V120Z" fill="%236366f1" fill-opacity="0.13"/></svg>') no-repeat top center;
+    z-index: 1;
+    animation: waveFadeIn 1.2s cubic-bezier(.4, 2, .6, 1);
+}
+
+@keyframes waveFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.ui-event1-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 48px;
+    position: relative;
+    z-index: 2;
+}
+
+.ui-event1-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #312e81;
+    letter-spacing: -1px;
+    text-shadow: 0 2px 8px rgba(99, 102, 241, 0.08);
+}
+
+.ui-event1-create-btn {
+    background: linear-gradient(135deg, #6366f1, #3b82f6);
+    color: #fff;
+    font-weight: bold;
+    border-radius: 24px;
+    padding: 10px 32px;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.12);
+    transition: background 0.3s, box-shadow 0.3s, transform 0.2s;
+    position: relative;
+    z-index: 2;
+}
+
+.ui-event1-create-btn:active {
+    transform: scale(0.97);
+}
+
+.ui-event1-create-btn:hover {
+    background: linear-gradient(135deg, #4f46e5, #2563eb);
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.18);
+    transform: translateY(-2px) scale(1.03);
+}
+
+
+/* --- Card Entrance Animation & Micro-interactions --- */
+
+.ui-event1-card-animate {
+    animation: cardFadeIn 0.7s cubic-bezier(.4, 2, .6, 1);
+    opacity: 0;
+    animation-fill-mode: forwards;
+}
+
+@keyframes cardFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.ui-event1-card {
+    transition: box-shadow 0.3s, transform 0.2s;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.10);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.92);
+    position: relative;
+    z-index: 2;
+}
+
+.ui-event1-card:hover {
+    box-shadow: 0 20px 40px rgba(99, 102, 241, 0.18);
+    transform: translateY(-6px) scale(1.02);
+}
+
+.ui-event1-card:active {
+    transform: scale(0.98);
+}
+
+
+/* --- Event Status Badge --- */
+
+.ui-event1-badge {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    background: linear-gradient(90deg, #6366f1 60%, #3b82f6 100%);
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 700;
+    padding: 4px 16px;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px #6366f133;
+    letter-spacing: 0.5px;
+    z-index: 3;
+    animation: badgePop 0.7s cubic-bezier(.4, 2, .6, 1);
+}
+
+@keyframes badgePop {
+    from {
+        opacity: 0;
+        transform: scale(0.7);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.ui-event1-badge.upcoming {
+    background: linear-gradient(90deg, #10b981 60%, #3b82f6 100%);
+}
+
+.ui-event1-badge.today {
+    background: linear-gradient(90deg, #f59e42 60%, #fbbf24 100%);
+}
+
+.ui-event1-badge.past {
+    background: linear-gradient(90deg, #a1a1aa 60%, #64748b 100%);
+}
+
+
+/* --- Empty State Illustration --- */
+
+.ui-event1-empty {
+    text-align: center;
+    margin-top: 64px;
+    position: relative;
+    z-index: 2;
+}
+
+.ui-event1-empty-illustration {
+    width: 180px;
+    margin: 0 auto 18px auto;
+    display: block;
+    opacity: 0.85;
+}
+
+.ui-event1-empty-title {
+    color: #6d28d9;
+    font-size: 1.3rem;
+    margin-bottom: 18px;
+    font-weight: 600;
+}
+
+
+/* Responsive grid tweaks */
+
+@media (max-width: 900px) {
+    .ui-event1-header {
+        flex-direction: column;
+        gap: 18px;
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 600px) {
+    .ui-event1-title {
+        font-size: 2rem;
+    }
+    .ui-event1-header {
+        margin-bottom: 28px;
+    }
+    .ui-event1-bg {
+        padding: 12px 0;
+    }
+}
+
+
+/* --- Sidebar Advanced Styles --- */
+
+.sidebar-logo-avatar {
+    box-shadow: 0 2px 12px #6366f155;
+    transition: transform 0.3s, box-shadow 0.3s;
+    animation: sidebarLogoPop 0.7s cubic-bezier(.4, 2, .6, 1);
+}
+
+@keyframes sidebarLogoPop {
+    from {
+        transform: scale(0.7);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.sidebar-listitem-btn {
+    border-radius: 18px 0 0 18px;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+
+.sidebar-listitem-btn:hover {
+    background: rgba(99, 102, 241, 0.13) !important;
+    color: #6366f1 !important;
+    transform: translateX(2px) scale(1.03);
+    box-shadow: 0 2px 12px #6366f122;
+}
+
+.sidebar-listitem-btn:active {
+    background: rgba(99, 102, 241, 0.18) !important;
+    color: #3b82f6 !important;
+    transform: scale(0.98);
+}
+
+
+/* --- Dashboard Header --- */
+
+.dashboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    padding: 12px 0 24px 0;
+    min-height: 64px;
+}
+
+.dashboard-header-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px #6366f122;
+    background: linear-gradient(135deg, #6366f1 60%, #3b82f6 100%);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dashboard-header-greeting {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #312e81;
+    letter-spacing: 0.2px;
+}

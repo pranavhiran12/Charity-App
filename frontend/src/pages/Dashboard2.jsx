@@ -1,10 +1,11 @@
 import Sidebar from '../components/Sidebar';
 import { Outlet } from 'react-router-dom';
-import { Box, Toolbar, Typography, Divider, Container } from '@mui/material';
+import { Box, Toolbar } from '@mui/material';
+import '../components/UIEvent1.css'; // Reuse or extend for dashboard background polish
 
 const Dashboard2 = () => {
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f9fafb' }}>
+    <Box className="ui-event1-bg" sx={{ display: 'flex', minHeight: '100vh' }}>
       {/* Sidebar Navigation */}
       <Sidebar />
 
@@ -13,24 +14,23 @@ const Dashboard2 = () => {
         component="main"
         sx={{
           flexGrow: 1,
-          bgcolor: '#f9fafb', // or your preferred color
           minHeight: '100vh',
           overflow: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
-
         <Toolbar /> {/* Keeps top spacing for AppBar */}
 
-        <Container maxWidth="xl" sx={{ pt: 3 }}>
+        {/* Dashboard Header */}
+        <div className="dashboard-header" style={{ animation: 'fadeInUp 0.7s cubic-bezier(.4,2,.6,1)' }}>
+          <span className="dashboard-header-avatar">A</span>
+        </div>
 
-
-          <Divider sx={{ mb: 4 }} />
-
+        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'stretch', px: { xs: 1, md: 4 }, pt: 2 }}>
           {/* Dynamic Page Content */}
-          <Box sx={{ px: 2 }}>
-            <Outlet />
-          </Box>
-        </Container>
+          <Outlet />
+        </Box>
       </Box>
     </Box>
   );

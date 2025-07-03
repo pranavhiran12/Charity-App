@@ -56,7 +56,7 @@ const Sidebar = () => {
     >
       <Toolbar>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Avatar sx={{ bgcolor: '#3b82f6', width: 40, height: 40, fontWeight: 600 }}>TP</Avatar>
+          <Avatar className="sidebar-logo-avatar" sx={{ bgcolor: '#3b82f6', width: 40, height: 40, fontWeight: 600 }}>TP</Avatar>
           <Typography variant="h6" noWrap sx={{ fontWeight: 'bold', letterSpacing: 0.5 }}>
             TwoPresents
           </Typography>
@@ -73,13 +73,15 @@ const Sidebar = () => {
               style={({ isActive }) => ({
                 textDecoration: 'none',
                 color: isActive ? '#3b82f6' : '#e5e7eb',
-                backgroundColor: isActive ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
+                backgroundColor: isActive ? 'rgba(59, 130, 246, 0.18)' : 'transparent',
                 width: '100%',
                 borderLeft: isActive ? '4px solid #3b82f6' : '4px solid transparent',
-                fontWeight: isActive ? 'bold' : 'normal'
+                fontWeight: isActive ? 'bold' : 'normal',
+                boxShadow: isActive ? '0 0 12px 2px #3b82f655' : 'none',
+                transition: 'all 0.25s cubic-bezier(.4,2,.6,1)'
               })}
             >
-              <ListItemButton sx={{ py: 1.5, px: 3 }}>
+              <ListItemButton className="sidebar-listitem-btn" sx={{ py: 1.5, px: 3 }}>
                 <ListItemIcon sx={{ color: 'inherit' }}>{item.icon}</ListItemIcon>
                 <ListItemText primary={item.text} />
               </ListItemButton>

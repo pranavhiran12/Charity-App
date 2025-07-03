@@ -18,14 +18,22 @@ import {
 } from '../api/eventApi';
 
 import axios from 'axios';
+import EventCard from './EventDetails/EventCard';
+import CircularProgress from '@mui/material/CircularProgress';
+import Alert from '@mui/material/Alert';
+import './UIEvent1.css';
 
 const UIEvent1 = () => {
     const [events, setEvents] = useState([]);
     const [invitationStats, setInvitationStats] = useState({});
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchEvents = async () => {
+            setLoading(true);
+            setError(null);
             try {
                 const data = await fetchAllEvents();
                 setEvents(data);
@@ -38,7 +46,6 @@ const UIEvent1 = () => {
                         statsMap[event._id] = {
                             invited: stats.accepted + stats.declined + stats.pending,
                             accepted: stats.accepted
-
                         };
                     } catch (err) {
                         console.warn(`Failed to fetch stats for event ${event._id}`, err);
@@ -47,7 +54,10 @@ const UIEvent1 = () => {
                 }
                 setInvitationStats(statsMap);
             } catch (err) {
+                setError('Error fetching events or stats.');
                 console.error("Error fetching events or stats:", err);
+            } finally {
+                setLoading(false);
             }
         };
         fetchEvents();
@@ -65,143 +75,83 @@ const UIEvent1 = () => {
         }
     };
 
+    // Helper to get event status
+    function getEventStatus(eventDate) {
+        const today = new Date();
+        const eventDay = new Date(eventDate);
+        if (
+            eventDay.toDateString() === today.toDateString()
+        ) return 'today';
+        if (eventDay > today) return 'upcoming';
+        return 'past';
+    }
+
     return (
-        <Box sx={{ p: { xs: 2, md: 4 }, backgroundColor: '#f3f4f6', minHeight: '100vh' }}>
-            <Box
-                sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    mb: 6
-                }}
-            >
-                <Typography variant="h4" sx={{ fontWeight: 700, color: '#1f2937' }}>
+        <Box className="ui-event1-bg">
+            <Box className="ui-event1-header">
+                <Typography variant="h4" className="ui-event1-title">
                     🎉 My Events
                 </Typography>
                 <Button
                     variant="contained"
+                    className="ui-event1-create-btn"
                     onClick={() => navigate('/dashboard2/create-template-event')}
-                    sx={{
-                        background: 'linear-gradient(135deg, #3b82f6, #6366f1)',
-                        color: '#fff',
-                        fontWeight: 'bold',
-                        textTransform: 'none',
-                        borderRadius: '24px',
-                        px: 4,
-                        py: 1.5,
-                        boxShadow: 4,
-                        '&:hover': {
-                            background: 'linear-gradient(135deg, #2563eb, #4f46e5)',
-                            boxShadow: 6,
-                        }
-                    }}
                 >
                     + Create New Event
                 </Button>
             </Box>
 
-            <Grid container spacing={4}>
-                {events.map((event, idx) => (
-                    <Grid item xs={12} sm={6} md={4} key={idx}>
-                        <Card
-                            sx={{
-                                backdropFilter: 'blur(6px)',
-                                background: 'rgba(255, 255, 255, 0.85)',
-                                borderRadius: '24px',
-                                boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-                                transition: 'all 0.3s ease-in-out',
-                                height: '100%',
-                                '&:hover': {
-                                    transform: 'translateY(-5px)',
-                                    boxShadow: '0 20px 30px rgba(0,0,0,0.15)',
-                                }
-                            }}
-                        >
-                            <CardContent>
-                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                    <Avatar
-                                        sx={{
-                                            width: 50,
-                                            height: 50,
-                                            mr: 2,
-                                            background: 'linear-gradient(135deg, #3b82f6, #6366f1)',
-                                            color: '#fff',
-                                            boxShadow: 3
-                                        }}
-                                    >
-                                        <EventIcon />
-                                    </Avatar>
-                                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                                        {event.eventTitle}
-                                    </Typography>
-                                </Box>
-
-                                <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                    sx={{
-                                        mb: 2,
-                                        lineHeight: 1.5,
-                                        display: '-webkit-box',
-                                        WebkitLineClamp: 3,
-                                        WebkitBoxOrient: 'vertical',
-                                        overflow: 'hidden'
-                                    }}
-                                >
-                                    {event.eventDescription}
-                                </Typography>
-
-                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.2 }}>
-                                    <AccessTimeIcon fontSize="small" sx={{ mr: 1, color: '#6b7280' }} />
-                                    <Typography variant="body2">
-                                        {new Date(event.eventDate).toLocaleDateString()} at {event.time}
-                                    </Typography>
-                                </Box>
-                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.2 }}>
-                                    <LocationOnIcon fontSize="small" sx={{ mr: 1, color: '#6b7280' }} />
-                                    <Typography variant="body2">{event.venue}</Typography>
-                                </Box>
-                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.2 }}>
-                                    <PeopleAltIcon fontSize="small" sx={{ mr: 1, color: '#6b7280' }} />
-                                    <Typography variant="body2">
-                                        Invited: {invitationStats[event._id]?.invited ?? 0}
-
-                                    </Typography>
-                                </Box>
-                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                    <DoneAllIcon fontSize="small" sx={{ mr: 1, color: '#10b981' }} />
-                                    <Typography variant="body2" sx={{ color: '#10b981' }}>
-                                        Accepted: {invitationStats[event._id]?.accepted ?? 0}
-                                    </Typography>
-                                </Box>
-                            </CardContent>
-
-                            <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
-                                <Button
-                                    size="small"
-                                    variant="outlined"
-                                    onClick={() => navigate(`/dashboard2/event/${event._id}`)}
-                                    sx={{
-                                        textTransform: 'none',
-                                        borderRadius: '16px',
-                                        fontWeight: 600,
-                                        px: 3
-                                    }}
-                                >
-                                    View
-                                </Button>
-                                <Tooltip title="Delete this event">
-                                    <IconButton onClick={() => handleDelete(event._id)} color="error">
-                                        <DeleteIcon />
-                                    </IconButton>
-                                </Tooltip>
-                            </CardActions>
-                        </Card>
-                    </Grid>
-                ))}
-            </Grid>
+            {loading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
+                    <CircularProgress size={48} thickness={4} />
+                </Box>
+            ) : error ? (
+                <Alert severity="error" sx={{ mb: 4 }}>{error}</Alert>
+            ) : events.length === 0 ? (
+                <Box className="ui-event1-empty">
+                    <svg className="ui-event1-empty-illustration" viewBox="0 0 180 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <ellipse cx="90" cy="100" rx="70" ry="12" fill="#e0e7ff" />
+                        <rect x="40" y="40" width="100" height="40" rx="12" fill="#6366f1" fillOpacity="0.13" />
+                        <rect x="60" y="50" width="60" height="20" rx="6" fill="#6366f1" fillOpacity="0.18" />
+                        <circle cx="90" cy="60" r="8" fill="#6366f1" fillOpacity="0.22" />
+                    </svg>
+                    <Typography variant="h6" className="ui-event1-empty-title">
+                        No events found. Start by creating your first event!
+                    </Typography>
+                    <Button
+                        variant="contained"
+                        className="ui-event1-create-btn"
+                        onClick={() => navigate('/dashboard2/create-template-event')}
+                    >
+                        + Create New Event
+                    </Button>
+                </Box>
+            ) : (
+                <Grid container spacing={4}>
+                    {events.map((event, idx) => (
+                        <Grid item xs={12} sm={6} md={4} key={event._id}>
+                            <div
+                                className={`ui-event1-card ui-event1-card-animate`}
+                                style={{ animationDelay: `${idx * 0.08 + 0.1}s` }}
+                            >
+                                {/* Event Status Badge */}
+                                <span className={`ui-event1-badge ${getEventStatus(event.eventDate)}`}>
+                                    {getEventStatus(event.eventDate) === 'today' ? 'Today' : getEventStatus(event.eventDate) === 'upcoming' ? 'Upcoming' : 'Past'}
+                                </span>
+                                <EventCard
+                                    event={event}
+                                    stats={invitationStats[event._id]}
+                                    onView={() => navigate(`/dashboard2/event/${event._id}`)}
+                                    onDelete={() => handleDelete(event._id)}
+                                />
+                            </div>
+                        </Grid>
+                    ))}
+                </Grid>
+            )}
         </Box>
     );
 };
 
 export default UIEvent1;
+
