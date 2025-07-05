@@ -12,19 +12,28 @@ import {
   Divider,
   Avatar,
   Tooltip,
-  IconButton
+  IconButton,
+  Button
 } from '@mui/material';
 import {
   Event,
   MarkEmailUnread,
   People,
   AccountCircle,
-  Logout
+  Logout,
+  AdminPanelSettings
 } from '@mui/icons-material';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { useNavigation } from '../contexts/NavigationContext';
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const { toggleMode } = useNavigation();
+
+  // Get user info to check if admin
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
+  const isAdmin = user && user.role === 'admin';
 
   const menuItems = [
     { text: 'Events', icon: <Event />, path: '/dashboard2/UIevent1' },
@@ -36,6 +45,11 @@ const Sidebar = () => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     navigate('/login');
+  };
+
+  const handleToggleMode = () => {
+    toggleMode();
+    navigate('/admin'); // Switch to admin dashboard
   };
 
   return (
@@ -92,6 +106,30 @@ const Sidebar = () => {
 
       <Box sx={{ flexGrow: 1 }} />
       <Box sx={{ p: 2, textAlign: 'center' }}>
+        {/* Show admin toggle only for admin users */}
+        {isAdmin && (
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={handleToggleMode}
+            startIcon={<AdminPanelSettings />}
+            sx={{
+              color: '#fff',
+              borderColor: 'rgba(255,255,255,0.3)',
+              mb: 2,
+              '&:hover': {
+                borderColor: 'rgba(255,255,255,0.5)',
+                backgroundColor: 'rgba(255,255,255,0.1)'
+              }
+            }}
+          >
+            Switch to Admin
+          </Button>
+        )}
+
+        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', mb: 1, display: 'block' }}>
+          Logged in as User
+        </Typography>
         <Tooltip title="Logout">
           <IconButton onClick={handleLogout} sx={{ color: '#f87171' }}>
             <Logout />

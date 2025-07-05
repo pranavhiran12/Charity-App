@@ -1,4 +1,4 @@
-import Sidebar from '../components/Sidebar';
+import ConditionalNavigation from '../components/ConditionalNavigation';
 import { Outlet } from 'react-router-dom';
 import { Box, Toolbar } from '@mui/material';
 import '../components/UIEvent1.css'; // Reuse or extend for dashboard background polish
@@ -6,8 +6,8 @@ import '../components/UIEvent1.css'; // Reuse or extend for dashboard background
 const Dashboard2 = () => {
   return (
     <Box className="ui-event1-bg" sx={{ display: 'flex', minHeight: '100vh' }}>
-      {/* Sidebar Navigation */}
-      <Sidebar />
+      {/* Conditional Navigation - Shows Sidebar for users, AdminNavbar for admins */}
+      <ConditionalNavigation />
 
       {/* Main Content Area */}
       <Box
