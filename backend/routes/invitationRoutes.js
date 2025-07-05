@@ -9,7 +9,9 @@ const {
     rsvpByInviteCode,
     updateInvitationWithGuest,
     getReceivedInvitations, // ✅ added
-    getInvitationStats
+    getInvitationStats,
+    createTestInvitation, // ✅ added for testing
+    debugInvitations // ✅ added for debugging
     //getInvitationsByUser        // ✅ optional: all sent invites by user
 } = require('../controllers/invitationController');
 
@@ -37,19 +39,21 @@ router.put('/:invitationCode/respond', respondToInvitation);
 router.post('/rsvp/:code', guestRSVP);
 router.put('/rsvp/:inviteCode', rsvpByInviteCode);
 
-// Fetching invitations
-router.get('/event/:eventId', getInvitationsByEvent);
-router.get('/:code', getInvitationByCode);
+// ✅ Test endpoint for creating test invitations
+console.log("🔧 Registering /create-test route");
+router.post('/create-test', authMiddleware, createTestInvitation);
+
+// ✅ Debug endpoint for checking all invitations
+router.get('/debug', authMiddleware, debugInvitations);
 
 // Linking and guest update
 router.post('/autolink', authMiddleware, autoLinkInvitation);
 router.put('/update-guest', updateInvitationWithGuest);
 
+// Fetching invitations
+router.get('/event/:eventId', getInvitationsByEvent);
 router.get('/stats/:eventId', getInvitationStats);
-
-// ✅ New: Received invitations for logged-in user
-
-
+router.get('/:code', getInvitationByCode);
 
 // ✅ Optional: Sent invitations by logged-in user
 //router.get('/sent', authMiddleware, getInvitationsByUser);

@@ -1,0 +1,130 @@
+/* UIEventDetails.module.css */
+
+.eventDetailsBg {
+    min-height: 100vh;
+    background: linear-gradient(120deg, #f0f4ff 0%, #e0e7ff 100%);
+    padding: 32px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.eventDetailsHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 1000px;
+    animation: fadeInDown 0.8s cubic-bezier(.4, 2, .6, 1);
+}
+
+.eventDetailsTitle {
+    font-size: 2.7rem;
+    font-weight: 900;
+    color: #3730a3;
+    letter-spacing: -1px;
+    text-shadow: 0 2px 12px rgba(99, 102, 241, 0.10);
+}
+
+.eventDetailsCard {
+    background: rgba(255, 255, 255, 0.97);
+    border-radius: 28px;
+    box-shadow: 0 12px 32px rgba(99, 102, 241, 0.10), 0 1.5px 8px rgba(59, 130, 246, 0.07);
+    padding: 32px 24px;
+    margin-top: 12px;
+    width: 100%;
+    max-width: 1000px;
+    position: relative;
+    z-index: 2;
+    animation: cardPopIn 0.9s cubic-bezier(.4, 2, .6, 1);
+}
+
+.section {
+    margin-top: 36px;
+}
+
+.sectionTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #4f46e5;
+    margin-bottom: 12px;
+}
+
+.copyButton {
+    background: linear-gradient(90deg, #6366f1 60%, #3b82f6 100%);
+    color: #fff !important;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px #6366f133;
+    transition: background 0.2s, transform 0.15s;
+}
+
+.copyButton:active {
+    transform: scale(0.97);
+}
+
+.copyButton:hover {
+    background: linear-gradient(90deg, #4f46e5 60%, #2563eb 100%);
+    box-shadow: 0 4px 16px #6366f144;
+    transform: translateY(-2px) scale(1.03);
+}
+
+.qrSection {
+    margin-top: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.qrBox {
+    padding: 18px;
+    border-radius: 18px;
+    background: #f1f5f9;
+    box-shadow: 0 2px 8px #6366f122;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes cardPopIn {
+    from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 900px) {
+    .eventDetailsHeader {
+        flex-direction: column;
+        gap: 18px;
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 600px) {
+    .eventDetailsTitle {
+        font-size: 2rem;
+    }
+    .eventDetailsHeader {
+        margin-bottom: 24px;
+    }
+    .eventDetailsBg {
+        padding: 10px 0;
+    }
+    .eventDetailsCard {
+        padding: 16px 6px;
+    }
+}

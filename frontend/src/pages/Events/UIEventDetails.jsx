@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 
-import { Box, Typography, TextField, IconButton, Tooltip } from '@mui/material';
+import { Box, Typography, TextField, IconButton, Tooltip, Button, CircularProgress } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
@@ -13,6 +13,7 @@ import AddContactForm from '../../components/EventDetails/AddContactForm';
 import UniversalContactsDialog from '../../components/EventDetails/UniversalContactsDialog';
 import ConfirmDeleteDialog from '../../components/EventDetails/ConfirmDeleteDialog';
 import Snackbars from '../../components/EventDetails/Snackbars';
+import Sidebar from '../../components/Sidebar';
 
 import {
     fetchEventById,
@@ -24,6 +25,8 @@ import {
     generateInvitationLink,
     fetchUniversalContacts
 } from '../../api/eventDetailsApi';
+
+import styles from './UIEventDetails.module.css';
 
 const UIEventDetails = () => {
     const { id: eventId } = useParams();
@@ -56,20 +59,9 @@ const UIEventDetails = () => {
             try {
                 const eventData = await fetchEventById(eventId);
                 setField('event', eventData);
-
-                // ✅ Direct call with guestId = null
-                const publicInviteCode = await generateInvitationLink(null, eventId);
-
-                if (publicInviteCode) {
-                    console.log("✅ Public Invite Code:", publicInviteCode);
-                    setField('publicInviteCode', publicInviteCode);
-                } else {
-                    console.warn("❌ No public invite code received.");
-                }
-
             } catch (err) {
-                console.error("Error initializing event details or public link:", err);
-                setField('errorMessage', 'Failed to load event or invitation link');
+                console.error("Error initializing event details:", err);
+                setField('errorMessage', 'Failed to load event');
             }
 
             fetchContacts();
@@ -217,97 +209,115 @@ const UIEventDetails = () => {
 
     const inviteLink = state.publicInviteCode ? `${window.location.origin}/invite/${state.publicInviteCode}` : '';
 
+    const generatePublicInviteLink = async () => {
+        try {
+            setField('loading', true);
+            const publicInviteCode = await generateInvitationLink(null, eventId);
+
+            if (publicInviteCode) {
+                console.log("✅ Public Invite Code:", publicInviteCode);
+                setField('publicInviteCode', publicInviteCode);
+                setField('successMessage', 'Public invitation link generated successfully!');
+            } else {
+                console.warn("❌ No public invite code received.");
+                setField('errorMessage', 'Failed to generate public invitation link');
+            }
+        } catch (err) {
+            console.error("Error generating public invitation link:", err);
+            setField('errorMessage', 'Failed to generate public invitation link');
+        } finally {
+            setField('loading', false);
+        }
+    };
+
     return (
-        <Box sx={{ py: 4, px: { xs: 2, sm: 4, md: 6 }, maxWidth: 1000, mx: 'auto' }}>
-            <Box
-                sx={{
-                    p: 4,
-                    borderRadius: 4,
-                    boxShadow: 3,
-                    backgroundColor: 'background.paper',
-                }}
-            >
-                <Typography variant="h4" fontWeight={600} gutterBottom>
-                    Event Details
-                </Typography>
-
-                <EventOverview event={state.event} />
-
-                {/* Invite Link Section */}
-                <Box mt={4}>
-                    <Typography variant="h6" fontWeight={500} gutterBottom>
-                        Public Invitation Link
-                    </Typography>
-
-                    <Box display="flex" alignItems="center" gap={2}>
-                        <TextField
-                            label="Invite Link"
-                            variant="outlined"
-                            value={inviteLink || 'Generating...'}
-                            InputProps={{ readOnly: true }}
-                            fullWidth
-                            error={!inviteLink}
-                            helperText={!inviteLink ? 'Public link not available yet.' : ''}
-                        />
-                        <Tooltip title={inviteLink ? "Copy Link" : "No link to copy"}>
-                            <span>
-                                <IconButton
-                                    onClick={() => navigator.clipboard.writeText(inviteLink)}
-                                    disabled={!inviteLink}
-                                    sx={{ bgcolor: 'grey.100', '&:hover': { bgcolor: 'grey.200' } }}
+        <Box className={styles.eventDetailsBg} sx={{ display: 'flex', minHeight: '100vh' }}>
+            {/* Sidebar Navigation */}
+            <Box sx={{ width: { xs: 70, sm: 220 }, flexShrink: 0 }}>
+                <Sidebar />
+            </Box>
+            {/* Main Content */}
+            <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', px: { xs: 1, sm: 2, md: 4 }, pt: 4 }}>
+                {/* Elegant Header */}
+                <div className={styles.eventDetailsHeader}>
+                    <span className={styles.eventDetailsTitle}>Event Details</span>
+                </div>
+                <Box className={styles.eventDetailsCard}>
+                    <EventOverview event={state.event} />
+                    {/* Invite Link Section */}
+                    <Box className={styles.section}>
+                        <Typography className={styles.sectionTitle} variant="h6" fontWeight={500} gutterBottom>
+                            Public Invitation Link
+                        </Typography>
+                        {!state.publicInviteCode && (
+                            <Box mb={2}>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={generatePublicInviteLink}
+                                    disabled={state.loading}
+                                    startIcon={state.loading ? <CircularProgress size={20} /> : null}
                                 >
-                                    <ContentCopyIcon />
-                                </IconButton>
-                            </span>
-                        </Tooltip>
-                    </Box>
-
-                    {/* QR Code Section */}
-                    {inviteLink && (
-                        <Box mt={4} display="flex" flexDirection="column" alignItems="center">
-                            <Typography variant="subtitle1" gutterBottom>
-                                Scan to open invite
-                            </Typography>
-                            <Box
-                                sx={{
-                                    p: 2,
-                                    borderRadius: 2,
-                                    bgcolor: 'grey.100',
-                                    boxShadow: 1,
-                                }}
-                            >
-                                <QRCodeCanvas value={inviteLink} size={180} />
+                                    {state.loading ? 'Generating...' : 'Generate Public Invitation Link'}
+                                </Button>
                             </Box>
+                        )}
+                        <Box display="flex" alignItems="center" gap={2}>
+                            <TextField
+                                label="Invite Link"
+                                variant="outlined"
+                                value={inviteLink || 'No public link generated yet'}
+                                InputProps={{ readOnly: true }}
+                                fullWidth
+                                error={!inviteLink}
+                                helperText={!inviteLink ? 'Click "Generate Public Invitation Link" to create a shareable link.' : ''}
+                            />
+                            <Tooltip title={inviteLink ? "Copy Link" : "No link to copy"}>
+                                <span>
+                                    <IconButton
+                                        onClick={() => navigator.clipboard.writeText(inviteLink)}
+                                        disabled={!inviteLink}
+                                        className={styles.copyButton}
+                                    >
+                                        <ContentCopyIcon />
+                                    </IconButton>
+                                </span>
+                            </Tooltip>
+                        </Box>
+                        {/* QR Code Section */}
+                        {inviteLink && (
+                            <Box className={styles.qrSection}>
+                                <Typography variant="subtitle1" gutterBottom>
+                                    Scan to open invite
+                                </Typography>
+                                <Box className={styles.qrBox}>
+                                    <QRCodeCanvas value={inviteLink} size={180} />
+                                </Box>
+                            </Box>
+                        )}
+                    </Box>
+                    {/* Other Functional Sections */}
+                    <Box className={styles.section}>
+                        <InvitationActions {...{ handleInvite, setField, loadUniversalContacts }} state={state} />
+                    </Box>
+                    {state.showInviteForm && (
+                        <Box className={styles.section}>
+                            <InviteOneForm {...{ state, setField, submitInviteGuest }} />
                         </Box>
                     )}
-                </Box>
-
-                {/* Other Functional Sections */}
-                <Box mt={5}>
-                    <InvitationActions {...{ handleInvite, setField, loadUniversalContacts }} state={state} />
-                </Box>
-
-                {state.showInviteForm && (
-                    <Box mt={4}>
-                        <InviteOneForm {...{ state, setField, submitInviteGuest }} />
+                    <Box className={styles.section}>
+                        <GuestListTable {...{ state, sendWhatsAppMessage, sendEmailInvite, setField }} />
                     </Box>
-                )}
-
-                <Box mt={4}>
-                    <GuestListTable {...{ state, sendWhatsAppMessage, sendEmailInvite, setField }} />
+                    <Box className={styles.section}>
+                        <AddContactForm {...{ state, handleAdd, setField }} />
+                    </Box>
+                    <ConfirmDeleteDialog {...{ state, setField, handleDeleteConfirmed }} />
+                    <UniversalContactsDialog {...{ state, setField, loadUniversalContacts, handleAddFromUniversal }} />
+                    <Snackbars {...{ state, setField }} />
                 </Box>
-
-                <Box mt={4}>
-                    <AddContactForm {...{ state, handleAdd, setField }} />
-                </Box>
-
-                <ConfirmDeleteDialog {...{ state, setField, handleDeleteConfirmed }} />
-                <UniversalContactsDialog {...{ state, setField, loadUniversalContacts, handleAddFromUniversal }} />
-                <Snackbars {...{ state, setField }} />
             </Box>
         </Box>
     );
-
 };
 
 export default UIEventDetails;

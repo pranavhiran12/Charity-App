@@ -42,7 +42,9 @@ const {
     updateCharity,
     deleteUser,
     deleteEvent,
-    deleteCharity
+    deleteCharity,
+    getDashboardStats,
+    testDatabase
 } = require('../controllers/adminController');
 
 // ✅ Ensure these are required
@@ -54,6 +56,8 @@ router.get('/users', authMiddleware, adminOnly, getAllUsers);
 router.get('/events', authMiddleware, adminOnly, getAllEvents);
 router.get('/contributions', authMiddleware, adminOnly, getAllContributions);
 router.get('/charities', authMiddleware, adminOnly, getAllCharities);
+router.get('/dashboard-stats', authMiddleware, adminOnly, getDashboardStats);
+router.get('/test-database', authMiddleware, adminOnly, testDatabase);
 
 router.post('/charity', authMiddleware, adminOnly, upload.single('image'), createCharity);
 router.put('/charity/:id', authMiddleware, adminOnly, upload.single('image'), updateCharity);

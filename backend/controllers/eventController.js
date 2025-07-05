@@ -31,7 +31,7 @@ exports.createEvent = async(req, res) => {
 // @desc    Get all events
 exports.getAllEvents = async(req, res) => {
     try {
-        const events = await Event.find()
+        const events = await Event.find({ host: req.user._id })
             .populate('host')
             .populate('charity.charityId');
         res.json(events);

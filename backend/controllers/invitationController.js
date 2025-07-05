@@ -286,12 +286,21 @@ exports.getReceivedInvitations = async(req, res) => {
         // Find invitations where:
         // - guestId matches a guest with this email
         // - OR invitation.email matches user email (for direct email invites)
-        const invitations = await Invitation.find({
-                $or: [
-                    { guestId: { $in: guestIds } },
-                    { email: userEmail }
-                ]
-            })
+        // BUT exclude invitations where the user is the sender (they sent it themselves)
+        const query = {
+            $or: [
+                { guestId: { $in: guestIds } },
+                { email: userEmail }
+            ],
+            sender: { $ne: req.user._id } // Exclude invitations sent by the current user
+        };
+
+        console.log("🔍 Query for received invitations:", JSON.stringify(query, null, 2));
+        console.log("🔍 User email:", userEmail);
+        console.log("🔍 Guest IDs:", guestIds);
+        console.log("🔍 Current user ID:", req.user._id);
+
+        const invitations = await Invitation.find(query)
             .populate('eventId')
             .populate('guestId');
 
@@ -334,6 +343,50 @@ exports.getReceivedInvitations = async(req, res) => {
 
     res.json({ invitations, totalCount });
 };*/
+
+// ✅ POST /api/invitations/create-test (for testing purposes)
+exports.createTestInvitation = async(req, res) => {
+    try {
+        const { eventId, guestId, invitationCode, status, sender, email } = req.body;
+
+        console.log("🔧 Creating test invitation with data:", { eventId, guestId, invitationCode, status, sender, email });
+
+        const newInvitation = new Invitation({
+            eventId,
+            guestId,
+            invitationCode,
+            status,
+            sender,
+            email
+        });
+
+        await newInvitation.save();
+
+        console.log("✅ Test invitation saved successfully:", newInvitation);
+
+        res.status(201).json({ message: 'Test invitation created', invitation: newInvitation });
+    } catch (err) {
+        console.error("❌ Error creating test invitation:", err);
+        res.status(500).json({ message: 'Server error creating test invitation' });
+    }
+};
+
+// ✅ GET /api/invitations/debug (for testing purposes)
+exports.debugInvitations = async(req, res) => {
+    try {
+        const allInvitations = await Invitation.find({}).populate('eventId guestId');
+        console.log("🔍 All invitations in database:", allInvitations);
+        res.json({
+            count: allInvitations.length,
+            invitations: allInvitations,
+            userEmail: req.user && req.user.email,
+            userId: req.user && req.user._id
+        });
+    } catch (err) {
+        console.error("❌ Error debugging invitations:", err);
+        res.status(500).json({ message: 'Server error debugging invitations' });
+    }
+};
 
 // ✅ GET /api/invitations/stats/:eventId
 exports.getInvitationStats = async(req, res) => {

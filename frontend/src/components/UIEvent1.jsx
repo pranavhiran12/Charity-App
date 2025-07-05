@@ -30,6 +30,9 @@ const UIEvent1 = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // Get current user info
+    const currentUser = JSON.parse(localStorage.getItem('user')) || { name: 'User' };
+
     useEffect(() => {
         const fetchEvents = async () => {
             setLoading(true);
@@ -54,8 +57,8 @@ const UIEvent1 = () => {
                 }
                 setInvitationStats(statsMap);
             } catch (err) {
-                setError('Error fetching events or stats.');
-                console.error("Error fetching events or stats:", err);
+                setError('Error fetching your events.');
+                console.error("Error fetching events:", err);
             } finally {
                 setLoading(false);
             }
@@ -92,6 +95,9 @@ const UIEvent1 = () => {
                 <Typography variant="h4" className="ui-event1-title">
                     🎉 My Events
                 </Typography>
+                <Typography variant="body1" sx={{ color: '#6b7280', mb: 2 }}>
+                    Welcome back, {currentUser.name}! Here are your events.
+                </Typography>
                 <Button
                     variant="contained"
                     className="ui-event1-create-btn"
@@ -116,14 +122,14 @@ const UIEvent1 = () => {
                         <circle cx="90" cy="60" r="8" fill="#6366f1" fillOpacity="0.22" />
                     </svg>
                     <Typography variant="h6" className="ui-event1-empty-title">
-                        No events found. Start by creating your first event!
+                        You haven't created any events yet. Start by creating your first event!
                     </Typography>
                     <Button
                         variant="contained"
                         className="ui-event1-create-btn"
                         onClick={() => navigate('/dashboard2/create-template-event')}
                     >
-                        + Create New Event
+                        + Create Your First Event
                     </Button>
                 </Box>
             ) : (

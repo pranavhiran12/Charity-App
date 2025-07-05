@@ -122,7 +122,7 @@ function App() {
             <Route path="contacts" element={<UIUniversalContactsPage />} />
             <Route path="contacts/:eventId" element={<UIContactsPage />} />
             <Route path="profile" element={<UIUserProfilePage />} />
-            <Route path="invitees/:eventId" element={<InviteeList />} />
+            <Route path="invitees/:eventId" element={<InviteeList />} /> {/* ✅ This line added */}
             <Route path="invitations/received" element={<ReceivedInvitations />} /> {/* ✅ This line added */}
             <Route path="test-send-invite" element={<TestSendInvitationForm />} />
           </Route>
@@ -148,15 +148,12 @@ function App() {
           <Route path="/invite/:invitationCode" element={<Invite />} />
 
           {/* Admin */}
-
           <Route path="/admin" element={<Dashboard2 />}>
             <Route index element={<AdminDashboard />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="events" element={<AdminEvents />} />
             <Route path="charities" element={<AdminCharities />} />
           </Route>
-
-
 
           {/* 404 */}
           <Route

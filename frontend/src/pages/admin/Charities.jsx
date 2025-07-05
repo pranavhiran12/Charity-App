@@ -231,51 +231,41 @@ const AdminCharities = () => {
             </Stack>
 
             <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-                <DialogTitle>{editMode ? "Edit Charity" : "Add Charity"}</DialogTitle>
+                <DialogTitle>{editMode ? 'Edit Charity' : 'Add New Charity'}</DialogTitle>
                 <DialogContent>
-                    <Stack spacing={2} mt={1}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
                         <TextField
-                            label="Name"
-                            fullWidth
+                            label="Charity Name"
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            fullWidth
                         />
                         <TextField
                             label="Description"
+                            value={formData.description}
+                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             fullWidth
                             multiline
                             rows={3}
-                            value={formData.description}
-                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                         />
                         <TextField
-                            label="Website"
-                            fullWidth
+                            label="Website URL"
                             value={formData.website}
                             onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                            fullWidth
                         />
                         <TextField
-                            label="Logo URL (optional)"
-                            fullWidth
+                            label="Logo URL"
                             value={formData.logoUrl}
                             onChange={(e) => setFormData({ ...formData, logoUrl: e.target.value })}
+                            fullWidth
                         />
-                        <Button variant="outlined" component="label">
-                            Upload Image
-                            <input
-                                type="file"
-                                hidden
-                                accept="image/*"
-                                onChange={(e) => setFormData({ ...formData, image: e.target.files[0] })}
-                            />
-                        </Button>
-                        {formData.image && <Typography variant="caption">{formData.image.name}</Typography>}
-                    </Stack>
+                    </Box>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseDialog}>Cancel</Button>
-                    <Button variant="contained" onClick={handleSubmit}>
-                        {editMode ? "Update" : "Create"}
+                    <Button onClick={handleSubmit} variant="contained" color="primary">
+                        {editMode ? 'Update' : 'Add'}
                     </Button>
                 </DialogActions>
             </Dialog>

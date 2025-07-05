@@ -10,6 +10,19 @@ import DoneAllIcon from '@mui/icons-material/DoneAll';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 const EventCard = ({ event, stats, onView, onDelete }) => {
+    const handleCardClick = (e) => {
+        // Don't trigger if clicking on the delete button or its tooltip
+        if (e.target.closest('[data-action="delete"]')) {
+            return;
+        }
+        onView();
+    };
+
+    const handleDeleteClick = (e) => {
+        e.stopPropagation(); // Prevent card click
+        onDelete();
+    };
+
     return (
         <Card
             sx={{
@@ -19,12 +32,14 @@ const EventCard = ({ event, stats, onView, onDelete }) => {
                 boxShadow: '0 10px 25px rgba(0,0,0,0.10)',
                 transition: 'all 0.3s cubic-bezier(.4,2,.6,1)',
                 height: '100%',
+                cursor: 'pointer',
                 '&:hover': {
                     transform: 'translateY(-6px) scale(1.02)',
                     boxShadow: '0 20px 40px rgba(0,0,0,0.13)',
                 }
             }}
             aria-label={`Event card for ${event.eventTitle}`}
+            onClick={handleCardClick}
         >
             <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -85,23 +100,19 @@ const EventCard = ({ event, stats, onView, onDelete }) => {
                 </Box>
             </CardContent>
 
-            <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
-                <Button
-                    size="small"
-                    variant="outlined"
-                    onClick={onView}
-                    sx={{
-                        textTransform: 'none',
-                        borderRadius: '16px',
-                        fontWeight: 600,
-                        px: 3
-                    }}
-                    aria-label={`View details for ${event.eventTitle}`}
-                >
-                    View
-                </Button>
+            <CardActions sx={{ justifyContent: 'flex-end', px: 2, pb: 2 }}>
                 <Tooltip title="Delete this event">
-                    <IconButton onClick={onDelete} color="error" aria-label={`Delete ${event.eventTitle}`}>
+                    <IconButton
+                        onClick={handleDeleteClick}
+                        color="error"
+                        aria-label={`Delete ${event.eventTitle}`}
+                        data-action="delete"
+                        sx={{
+                            '&:hover': {
+                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            }
+                        }}
+                    >
                         <DeleteIcon />
                     </IconButton>
                 </Tooltip>

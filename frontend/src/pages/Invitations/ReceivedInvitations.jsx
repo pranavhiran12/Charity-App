@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import {
     Box, Typography, Grid, Card, CardContent, CardActions, Button,
-    TextField, CircularProgress, InputAdornment, Pagination, Chip, Avatar
+    TextField, CircularProgress, InputAdornment, Pagination, Chip, Avatar, IconButton
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import axios from 'axios';
 
 const ReceivedInvitations = () => {
@@ -58,9 +59,18 @@ const ReceivedInvitations = () => {
 
     return (
         <Box px={3} py={4}>
-            <Typography variant="h4" fontWeight="bold" gutterBottom>
-                🎁 Invitations Received
-            </Typography>
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                <Typography variant="h4" fontWeight="bold">
+                    🎁 Invitations Received
+                </Typography>
+                <IconButton
+                    onClick={fetchReceivedInvitations}
+                    disabled={loading}
+                    sx={{ color: 'primary.main' }}
+                >
+                    <RefreshIcon />
+                </IconButton>
+            </Box>
 
             <TextField
                 placeholder="Search by event, venue, or name"
